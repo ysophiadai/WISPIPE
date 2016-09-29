@@ -4,6 +4,7 @@ HST WISP pipeline
 Documention is in the DOC directory. Read:
 
 wispipe-dr-guidline.txt
+
 howtolaunch.txt
 
 In addition to this, you need to setup your paths and setup pyraf.
@@ -23,7 +24,7 @@ files in these locations.
 
 setenv WISPIPE /Users/mrafelski/WISPIPE/
 
-setenv iref ~/data/iref/
+setenv iref ~/data/iref/\n
 setenv crrefer ~/data/synphot/
 setenv mtab ~/data/synphot/mtab/
 setenv crotacomp ~/data/synphot/comp/ota/
