@@ -1,5 +1,6 @@
 # WISPIPE
-HST WISP pipeline
+HST WISP pipeline. This is used to reduce the WISP data. Current
+version is 6.1. 
 
 Documention is in the DOC directory. Read:
 
