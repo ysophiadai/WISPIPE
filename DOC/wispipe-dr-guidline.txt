@@ -1,0 +1,122 @@
+Readme.txt
+Guidance on how to use the WISP pipeline for data reduction
+Created by Sophia Dai
+2016.09.26 
+
+
+
+==========  system requirements ==========
+IDL version: 8.5.1 (Ivano) 8.2 (Sophia)
+Ureka version: 1.5.2 (Ivano) 1.4.1.2 (Sophia)
+Astroconda version: 4.1.11 (Ivano) 4.1.1 (Sophia)
+
+* notes:
+1. make sure Ureka and astroconda are activated before proceeding to data reduction. 
+2. above is the setting that works for Sophia Dai. Your version may still work. 
+
+
+==========  preparation ==========
+Download the raw data from HST MAST (http://archive.stsci.edu/hst/search.php)
+1. Choose the proposal ID and Obset ID (orbits), refer to the google drive excel sheet for information on individual field (https://docs.google.com/spreadsheets/d/1QWagshUlPFoGPTFxSIwl6dVKE-MWEck2jC2DF398iJ4/edit?usp=sharing)
+
+2. Download the 'calibrated' data for IR exposures, and 'uncalibrated'+'reference files' for UVIS exposures.  
+(If space allows, I would just download everything.)
+
+
+==========  step1  (IDL and command line ds9 needed) ==========
+use findf.pro to check individual exposures (e.g. Par258)
+IDL > findf,'258'
+
+if there are single exposures (e.g icdx3l2q*.fits) that needs to be abandoned:
+IDL > spawn,'mkdir badframes'
+IDL > spawn,'mv icdxd3l2q*.* badframes'
+
+
+
+
+==========  if w/UVIS, step2 (IDL and astroconda needed)==========
+run uvis_preprocess in IDL 
+
+step 2.1: check
+IDL > uvis_preprocess,'Par260','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE' ,/darksonly
+
+
+step 2.2: process
+-------- use uvis_preprocess, .....,  /nopostflash before Oct, 2012--------
+IDL > uvis_preprocess,'Par258',/mp,'/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/nopostflash
+
+-------- use uvis_preprocess, .....,  /single, if only 1 UVIS filter--------
+IDL > uvis_preprocess,'Par346','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/mp,/single
+
+-------- use uvis_preprocess, .....,  /calwf3only,  if everything run through, but stopped at the calwfc3 step--------
+IDL > uvis_preprocess,'Par358','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/mp,/calwf3only
+
+
+
+
+========== step3  (IDL and ureka needed) ==========
+run wispipe_*.sh
+%./wispipe.sh ParXXX $PATH1 $PATH/WISPIPE > & log-206-160310-1810.txt 
+ 
+- PATH1 
+	the directory with the following structure:
+- $PATH 
+	has two subdirectories:  
+$PATH/aXe/	         for reduced data
+$PATH/data/          for raw data, where ParXXX should be ready before processing
+- log 
+	name convention: 'log' + PAR# + DATE + starttime + '.txt'
+	it is useful to go back to the log to look for errors or bugs
+ 
+ 
+Note: 
+For fields with both IR filters and no UVIS, use wispipe.sh
+For field with 2 UVIS filters, use wispipe_uvis.sh
+For field with 1 UVIS filter, use wispipe_uvis_single.sh (may be obsolete as the only difference is in tweakreg_uvis_single.py and make_uvis_helpfile.py) 
+For field with only G141 filter (no G102), use wispipe_g141.sh
+For field with only G141 filter (no G102) and only 1 exposure (no tweakreg needed), use wispipe_g141_single.sh
+For field with F140 + G102 + G141 filters, use wispipe_F140.sh
+
+========== step4 (IDL and command line ds9 needed)  ==========
+check the output, 
+this program displays drizzled IR direct+grism, and UVIS data + pdf file for 1D spectra
+IDL > qacheck,'258'
+
+if w/UVIS observation, 
+IDL > qacheck,'258',/uvis
+ 
+ 
+==========  Tips ==========
+to reduce several fields in a row, generate a shell script with content:
+./wispipe.sh ParXXX /Volumes/Kudo/DATA/WISPS ~/WISPIPE > & log-206-160310-1810.txt 
+./wispipe.sh ParXXX /Volumes/Kudo/DATA/WISPS ~/WISPIPE > & log-216-160310-1900.txt 
+...
+...
+...
+
+then in shell source dr.sh:
+% ./dr.sh
+
+
+
+
+
+Appendix 1: 
+========= Astroconda install ========= 
+-   download the Mac OSX python 2.7 graphical installer from https://www.continuum.io/downloads
+
+- Graphical Installer:
+- Download the graphical installer.
+- Optional: Verify data integrity with MD5 or SHA-256. more info
+- Double-click the downloaded .pkg file and follow the instructions.
+
+- follow instructions on : http://astroconda.readthedocs.io/en/latest/installation.html
+bash -l
+$ conda       % works!
+$ conda config --add channels http://ssb.stsci.edu/astroconda
+$ conda create -n astroconda stsci
+Proceed ([y]/n)? y     % downloading a few packages
+$ source activate astroconda
+
+to check versions:
+$ conda info anaconda

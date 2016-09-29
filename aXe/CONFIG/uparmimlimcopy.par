@@ -1,0 +1,4 @@
+input,s,a,"bp_mask_v6.pl",,,"Input images"
+output,s,a,"tteesstt.fits",,,"Output images or directory"
+verbose,b,h,yes,,,"Print operations performed?"
+mode,s,h,"ql",,,

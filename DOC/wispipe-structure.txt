@@ -1,0 +1,118 @@
+========================  pipeline structure =================================
+Prepared by Sophia Dai for the WISP PIPELINE, 2015.02.26
+
+=============================        Summary             =====================
+
+Spectra 	
+Stamps 
+
+DATA/DIRECT_GRISM/fin_F*.cat 
+DATA/DIRECT_GRISM/*.reg 
+DATA/DIRECT_GRISM/F*.fits
+DATA/DIRECT_GRISM/G*.fits
+
+SEX/F*full.cat        
+SEX/cat_deblend_flag.cat
+
+Plots/*.pdf 
+
+G102_DRIZZLE
+G141_DRIZZLE 
+
+----------For field with UVIS data----------
+DATA/UVIS/F*.fits
+DATA/UVIS/UVIStoIR
+DATA/UVIS/IRtoUVIS
+
+=============== What are the files included in a *_final.tar file?  ==========
+Spectra 
+-- This is the folder containing all the wavelength calibrated 1D spectra extracted from aXe product: *_SPC.fits
+	*.SPC is the aXe-extracted FITS file containing FITS binary table extensions.
+	
+Stamps 
+-- This is the folder containing all the wavelength calibrated 1D spectra extracted from aXe product: *_STP.fits
+	*.STP is an aXe-genetared multi-extension FITS file containing stamp images of the BEAMS that were extracted.
+
+
+DATA/DIRECT_GRISM/fin_F*.cat 
+-- The matched catalog arranged in declining magnitude order. The numbering of objects are matched between filters. 
+	First column is the 'ParID_RA_DEC' name of the object, e.g. 17_33.418926_12.897039
+	Numbering convention: < 1000: matched in both filters
+		               1000 ~ 2000: F140 (or F160) only
+		               >= 2000 : F110 only
+-- Summary of SE parameters**:
+	F110: if exptime > 1041s, det_thresh=1.9; if exptime < 1041s, det_thresh=2.3  *
+		  -mag_zeropoint 26.83
+	F140: -det_thresh 2.0
+		  -mag_zeropoint 26.46
+	F160: -det_thresh 2.3
+		  -mag_zeropoint 25.96
+	*1041s chosen for a detection limit of 27.5 mag (3 sigma)
+	Other shared parameters: 
+	-ANALYSIS_THRESH 2.0 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -detect_minarea 12 (!!!!! 2*6 !!!!)
+	-WEIGHT_TYPE MAP_WEIGHT,MAP_RMS
+	-filter Y -filter_name $CONFIG/gauss_2.0_5x5.conv -GAIN 'exptime' -STARNNW_NAME $CONFIG/default.nnw -CHECKIMAGE_TYPE SEGMENTATION
+**: Note with the change of pixel scale and pixfrac during drizzle, the 'det_minarea' now needs to be updated to HIGHER values. 
+	NEEDS TO BE implemented in the test fields sent out, for 
+
+DATA/DIRECT_GRISM/*.reg 
+-- region files generated for the direct and grism images based on the cat_F*.cat. 
+	Elliptical regions are given corresponding to the SE parameters of major axis, minor axis, and angles (of image units) 
+
+
+DATA/DIRECT_GRISM/
+	F1*0.fits : direct images directly combined using >iraf.combine
+	G102.fits & G141.fits: grism image directly combined using >iraf.combine
+	F*_drz.fits : astrodrizzled direct image with pixfrac=0.75, final_scale=0.08
+	F*_sci.fits : The first extension of the F*_drz.fits
+	F*_wht.fits, & F*_rms.fits: weight map and correlated error corrected rms map generated from the F*_drz.fits.
+	G*_drz.fits : astrodrizzled grism image with pixfrac=0.75, final_scale=0.08
+
+SEX/F*W_full.cat
+ -- Similar to the SExtractor generated catalog but with 2 more indices: 1.ratio of bad pixels 2. spurious flag. 
+ 		Spurious flags include:;
+	        1. objects close to the edge (flag=9)
+    	    2. objects that contains > limitr (%) of weight=0 pixels (flag=99)
+        	3. objects that are possibly due to star diffractions or persistence  (flag=999)
+
+
+ 		The following spurious objects are removed from future process:
+		  1. objects close to the edge  (10 pixels on top, left, bottom edge; and 20 pixels on the right)
+          2. objects that contains > 50% weight=0 pixels   the ratio of n_bad/n_total pixels will be stored in the full catalog. 
+          3. objects that are possibly due to star diffractions and/or persistence, usually with high eccentricity (ecc > 0.98)
+            for an example field see Fig: seflag-par167.png. Cyan regions mark the ones that are being flagged and rejected.
+        Update: A 'clean' catalog will be passed on to the pipeline for aXe but the full catalog is also be provided.
+  	  Note:  persistence or spikes that are not caught here will be eventually removed by-eye during the spectra inspection
+        
+SEX/cat_deblend_flag.cat
+ --  This catalog include objects that are blended in one filter but not the other. Both the blended and unblended objects are listed. 
+     Note these objects are only flagged, but they are still kept in the catalog.
+
+Plots/*.pdf 
+--  A pdf file with all the spectra plotted for easy inspection*. 
+	*Empty ones are the files that have strange feature, e.g. noisy spikes that does not allow automatic plotting.
+
+
+G102_DRIZZLE
+G141_DRIZZLE 
+--  These two folders contain all the 2D drizzled grism images. 
+	File names are '[DRZROOTkeyword]_mef_ID[object number].fts', e.g. aXeWFC3_G102_mef_ID5.fits. 
+	They are multi-extension FITS files created in the task axedrizzle.
+ 
+ 
+----------For field with UVIS data----------
+DATA/UVIS/
+	F*_drz.fits : astrodrizzled direct UVIS image with pixfrac=0.75, final_scale=0.08
+	F*_sci.fits : The first extension of the F*_drz.fits
+	F*_wht.fits, & F*_rms.fits: weight map and correlated error corrected rms map generated from the F*_drz.fits.
+DATA/UVIS/UVIStoIR:
+	F*_drz.fits : astrodrizzled direct images onto the UVIS pixle scale with final_scale=0.13, size=1600*1600
+	F*_sci.fits : The first extension of the F*_drz.fits
+	F*_wht.fits, & F*_rms.fits: weight map and correlated error corrected rms map generated from the F*_drz.fits.
+DATA/UVIS/IRtoUVIS:
+	F*_drz.fits : astrodrizzled direct images onto the UVIS pixle scale with final_scale=0.04, size=4800*4800
+	F*_sci.fits : The first extension of the F*_drz.fits
+	F*_wht.fits, & F*_rms.fits: weight map and correlated error corrected rms map generated from the F*_drz.fits.
+----------- end of UVIS--------
+
+============ end =============
