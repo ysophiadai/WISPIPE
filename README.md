@@ -24,10 +24,14 @@ files in these locations.
 
 setenv WISPIPE /Users/mrafelski/WISPIPE/
 
-setenv iref ~/data/iref/\n
+setenv iref ~/data/iref/
+
 setenv crrefer ~/data/synphot/
+
 setenv mtab ~/data/synphot/mtab/
+
 setenv crotacomp ~/data/synphot/comp/ota/
+
 setenv crwfc3comp ~/data/synphot/comp/wfc3/
 
 .bashrc:
@@ -35,7 +39,11 @@ setenv crwfc3comp ~/data/synphot/comp/wfc3/
 export WISPIPE=/Users/mrafelski/WISPIPE/
 
 export iref=~/data/iref/
+
 export mtab=~/data/synphot/mtab/
+
 export crrefer=~/data/synphot/
+
 export crotacomp=~/data/synphot/comp/ota/
+
 export crwfc3comp=~/data/synphot/comp/wfc3/
