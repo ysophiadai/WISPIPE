@@ -9,14 +9,14 @@
 ;#        cat_F110.cat (or 140 or 160)
 ;# procedure called: axe_sing
 ;# Output: plots in eps format generated in the /Plots directory, with
-;#   /spectra_0_* for obj ID < 1000 (matched in both filters - dualimage mode),
-;#   /spectra_1_* for obj ID 1000-2000 (detected F110 but not in dual image mode)
-;#   /spectra_2_* for obj ID 2000-3000 (detected F140/160 but not dual image mode)
-;#   /spectra_3_* for obj ID >3000 (detected in F110 and F140/160 but not dual image mode )
+;#   /spectra_0_* for obj ID < 10000 (matched in both filters - dualimage mode),
+;#   /spectra_1_* for obj ID 10000-20000 (detected F110 but not in dual image mode)
+;#   /spectra_2_* for obj ID 20000-30000 (detected F140/160 but not dual image mode)
+;#   /spectra_3_* for obj ID >30000 (detected in F110 and F140/160 but not dual image mode )
 ;#   A pdf file with all the spectra plotted in one
 ;# 
 ;# Completely rewritten by Ivano Baronchelli Sept. 2016
-;# - Possible 3000 ID+ are saved in /spectra_2_*
+;# - Possible 30000 ID+ are saved in /spectra_2_*
 ;# - joinpy procedure is allowed to make an unique pdf file.
 ;#  This should be the default in mac-OS systems (why people should
 ;#  install something else?).
@@ -32,14 +32,14 @@ path = path0+'/aXe/'+field+"/"
 
 IF FILE_TEST(path+'DATA/DIRECT_GRISM/cat_F160.cat') eq 1 then catname=path+'DATA/DIRECT_GRISM/cat_F160.cat'
 IF FILE_TEST(path+'DATA/DIRECT_GRISM/cat_F140.cat') eq 1 then catname=path+'DATA/DIRECT_GRISM/cat_F140.cat'
-IF FILE_TEST(path+'DATA/DIRECT_GRISM/cat_F110.cat') eq 1 then catname=path+'DATA/DIRECT_GRISM/cat_F110.cat
+IF FILE_TEST(path+'DATA/DIRECT_GRISM/cat_F110.cat') eq 1 then catname=path+'DATA/DIRECT_GRISM/cat_F110.cat'
 
 readcol,catname,object,format=('I')
 
-max0=0L ; Number of files created (ID 0-1000)
-max1=0L ; Number of files created (ID 1000-2000)
-max2=0L ; Number of files created (ID 2000-3000)
-max3=0L ; Number of files created (ID 3000+)
+max0=0L ; Number of files created (ID 0-10000)
+max1=0L ; Number of files created (ID 10000-20000)
+max2=0L ; Number of files created (ID 20000-30000)
+max3=0L ; Number of files created (ID 30000+)
 
 PAGE='CLOSED'
 
@@ -52,13 +52,13 @@ while n lt n_elements(object) do begin
 ; ################################################################################################################
           if n lt n_elements(object) then begin
              beam=object[n]
-             if object[n] ge 0    and object[n] lt 1000 then car='0'
-             if object[n] ge 1000 and object[n] lt 2000 then car='1'
-             if object[n] ge 2000 and object[n] lt 3000 then car='2'
-             if object[n] ge 3000 then car='3'
-             IF object[n] eq 1000 then i=0
-             IF object[n] eq 2000 then i=0
-             IF object[n] eq 3000 then i=0
+             if object[n] ge 0    and object[n] lt 10000 then car='0'
+             if object[n] ge 10000 and object[n] lt 20000 then car='1'
+             if object[n] ge 20000 and object[n] lt 30000 then car='2'
+             if object[n] ge 30000 then car='3'
+             IF object[n] eq 10000 then i=0
+             IF object[n] eq 20000 then i=0
+             IF object[n] eq 30000 then i=0
              Print,"Extraction BEAM ...............",beam
             ;/////////////////////////////////////////////////////////////////////////////////////////
             stpname_102=path+'G102_DRIZZLE/'+'aXeWFC3_G102_mef_ID'+strcompress(string(beam),/remove_all)+'.fits'
@@ -84,7 +84,7 @@ while n lt n_elements(object) do begin
             ;/////////////////////////////////////////////////////////////////////////////////////////
 
             if YN eq 'Y' then begin
-               IF RR eq 0 or beam eq 1000 or beam eq 2000 or beam eq 3000 THEN BEGIN
+               IF RR eq 0 or beam eq 10000 or beam eq 20000 or beam eq 30000 THEN BEGIN
 
                  ; Close previous file 
                   IF PAGE eq 'OPEN' then begin
@@ -101,10 +101,10 @@ while n lt n_elements(object) do begin
                  !P.MULTI = [0,1,3]
                  PAGE='OPEN'
                  ; update maximum value
-                 if object[n] ge 0 and object[n] lt 1000 then max0=max0+1
-                 if object[n] ge 1000 and object[n] lt 2000 then max1=max1+1
-                 if object[n] ge 2000 and object[n] lt 3000 then max2=max2+1
-                 if object[n] ge 3000 then max3=max3+1
+                 if object[n] ge 0 and object[n] lt 10000 then max0=max0+1
+                 if object[n] ge 10000 and object[n] lt 20000 then max1=max1+1
+                 if object[n] ge 20000 and object[n] lt 30000 then max2=max2+1
+                 if object[n] ge 30000 then max3=max3+1
               ENDIF
                axe_sing_IB1,field,beam,n,shift,trim,/save,path0
                shift=shift+1

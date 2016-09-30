@@ -69,17 +69,17 @@ pro new_match_cat3,field, path0
 ;   uncertainty differ in the two filters. 
 ; - The second part of the catalogs is made by sources detected in
 ;   single image mode (SIN), in the J band (only), but not in dual
-;   image mode. Their IDs starts from 1000. The magnitude in the J
+;   image mode. Their IDs starts from 10000. The magnitude in the J
 ;   catalog is the measured one, while in the H filter it is set to
 ;   the H magnitude limit, with mag uncertainty =-99 and
 ;   flag=extraction flag+90.
 ; - The third part is made by sources detected in single image mode
 ;   (SIN), in the H band (only), but not in dual image mode. Their IDs
-;   starts from 2000. The magnitude in the H catalog is the measured
+;   starts from 20000. The magnitude in the H catalog is the measured
 ;   one, while in the J catalog it is set to the J magnitude limit,
 ;   with magnitude uncertainty set to -99 and flag=extraction flag+90. 
 ; - The fourth part is made by sources detected in both J and H band,
-;   but not in dual image mode. Their IDs starts from 3000.
+;   but not in dual image mode. Their IDs starts from 30000.
 ; Sources identified in SIM in the J and/or H band are included in the
 ; catalog when they complay with the following criteria:
 ; A) The SIM source position overlap to a void area (pixel value = 0)
@@ -499,9 +499,9 @@ SEGMAP=mrdfits(segmap_name,0,HDSEG)
 ;----------------------------------------------------------------
 ; FIND J AND H SIM SOURCES WITHOUT COUNTERPART IN DIM 
 ;----------------------------------------------------------------
-; --> IDs: 1000+ identification in J SIM only
-; --> IDs: 2000+ identification in H SIM only
-; --> IDs: 3000+ identification in both J and H SIM
+; --> IDs: 10000+ identification in J SIM only
+; --> IDs: 20000+ identification in H SIM only
+; --> IDs: 30000+ identification in both J and H SIM
 
 ; Match position and check in the segmentation map if they are
 ; superimposed to a detected source.
@@ -511,7 +511,7 @@ SEGMAP=mrdfits(segmap_name,0,HDSEG)
 ; inside a 2 A_IMAGE distance from that source, otherwise
 ; consider them as isoleted (and include them in the catalog)
 ; - Then check for possible J-H SIM counterparts among the isolated
-;   sources. In this case remove both and put a new 3000+ J-H source
+;   sources. In this case remove both and put a new 30000+ J-H source
 
 ; FIRST:
 ; All the sources with underlying segmentation map =0 are
@@ -613,7 +613,7 @@ endwhile
 
 ; SECOND: 
 ; Check for J-H possible counterparts among the isolated ones
-; identified before. These will have a 3000+ ID
+; identified before. These will have a 30000+ ID
 
 
 J_H_IDX=-1
@@ -626,8 +626,8 @@ IF ISOL_J[0] ne -1 and ISOL_H[0] ne -1 then begin
  PRINT, 'NOTE: Zero associations here is not an error!'
  print, ' It just means that there are 0 sources with J and H identifications without a countrpart in the J+H combined image. '
  IF J_H_IDX[0] ne -1 then begin 
-  SEGVECT_J[ISOL_J[J_H_IDX]]=0 ; reset for 3000+ sources
-  SEGVECT_H[ISOL_H[H_J_IDX]]=0 ; reset for 3000+ sources
+  SEGVECT_J[ISOL_J[J_H_IDX]]=0 ; reset for 30000+ sources
+  SEGVECT_H[ISOL_H[H_J_IDX]]=0 ; reset for 30000+ sources
  ENDIF
 ENDIF
 
@@ -639,7 +639,7 @@ IDX_ISOL_H=where(SEGVECT_H gt 0)
 
 ; THIRD ADD SOURCES TO THE CATALOG
 
-; 1000+ ; J ONLY SOURCES
+; 10000+ ; J ONLY SOURCES
 
 IF IDX_ISOL_J[0] ne -1 then begin
 ; SORT sources as a function of J magnitude
@@ -648,14 +648,14 @@ SORT_JSIN=sort(abs(MAG_JSIM[IDX_ISOL_J]))
 JJ=0L
 while JJ lt n_elements(IDX_ISOL_J) do begin
 ; WRITING IN J CATALOG (u1)
-printf, u1, JJ+1000,X_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],X_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],MAG_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]], MAGERR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],CLASS_STAR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],FLAGS_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u1, JJ+10000,X_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],X_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],MAG_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]], MAGERR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],CLASS_STAR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],FLAGS_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 ; WRITING IN H CATALOG (u2)(in this case, mag=mag_lim_H)
-printf, u2, JJ+1000,X_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],X_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],limit_H,-99,CLASS_STAR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],FLAGS_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]]+90,format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u2, JJ+10000,X_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_IM_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],X_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],Y_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],A_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],B_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],THETA_WO_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],limit_H,-99,CLASS_STAR_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]],FLAGS_JSIM[IDX_ISOL_J[SORT_JSIN[JJ]]]+90,format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 JJ=JJ+1
 endwhile
 ENDIF
 
-; 2000+ ; H ONLY SOURCES
+; 20000+ ; H ONLY SOURCES
 
 IF IDX_ISOL_H[0] ne -1 then begin
 ; SORT sources as a function of H magnitude
@@ -664,14 +664,14 @@ SORT_HSIN=sort(abs(MAG_HSIM[IDX_ISOL_H]))
 HH=0L
 while HH lt n_elements(IDX_ISOL_H) do begin
 ; WRITING IN H CATALOG (u2)
-printf, u2, HH+2000,X_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],X_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],MAG_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]], MAGERR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],CLASS_STAR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],FLAGS_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u2, HH+20000,X_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],X_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],MAG_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]], MAGERR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],CLASS_STAR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],FLAGS_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 ; WRITING IN J CATALOG (u1)(in this case, mag=mag_lim_J)
-printf, u1, HH+2000,X_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],X_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],limit_J,-99,CLASS_STAR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],FLAGS_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]]+90,format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u1, HH+20000,X_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_IM_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],X_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],Y_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],A_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],B_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],THETA_WO_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],limit_J,-99,CLASS_STAR_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]],FLAGS_HSIM[IDX_ISOL_H[SORT_HSIN[HH]]]+90,format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 HH=HH+1
 endwhile
 ENDIF
 
-; 3000+ ; J and H SOURCES, not detected by DIM
+; 30000+ ; J and H SOURCES, not detected by DIM
 
 IF J_H_IDX[0] ne -1 then begin
 ; SORT sources as a function of J magnitude
@@ -700,9 +700,9 @@ SORT_JHSIN=sort(MAGSORT2)
 JH=0L
 while JH lt n_elements(J_H_IDX) do begin
 ; WRITING IN J CATALOG (u1)
-printf, u1, JH+3000,X_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],Y_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],A_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],B_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],THETA_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],X_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],Y_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],A_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],B_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],THETA_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],MAG_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]], MAGERR_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],CLASS_STAR_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],FLAGS_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u1, JH+30000,X_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],Y_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],A_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],B_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],THETA_IM_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],X_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],Y_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],A_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],B_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],THETA_WO_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],MAG_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]], MAGERR_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],CLASS_STAR_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],FLAGS_JSIM[ISOL_J[J_H_IDX[SORT_JHSIN[JH]]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 ; WRITING IN H CATALOG (u2)
-printf, u2, JH+3000,X_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],Y_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],A_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],B_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],THETA_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],X_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],Y_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],A_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],B_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],THETA_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],MAG_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]], MAGERR_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],CLASS_STAR_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],FLAGS_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
+printf, u2, JH+30000,X_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],Y_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],A_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],B_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],THETA_IM_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],X_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],Y_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],A_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],B_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],THETA_WO_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],MAG_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]], MAGERR_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],CLASS_STAR_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],FLAGS_HSIM[ISOL_H[H_J_IDX[SORT_JHSIN[JH]]]],format='((I5, 4(F10.3), F10.1, 4(F20.10), F10.1, 2F10.4, F10.2, I10))'
 JH=JH+1
 endwhile
 ENDIF
