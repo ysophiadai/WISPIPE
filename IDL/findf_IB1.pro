@@ -15,7 +15,6 @@
 ;###############################################################
 
 pro findf_IB1,field, path,clean=clean, ir=ir
-
 ;path_data = path0+'/data/'+field+"/"
 if keyword_set(field) then cd,path+'/data/'+strtrim(field,2)
 spawn, 'ls -1 *flt*.fits', flt
@@ -76,6 +75,5 @@ qacheck:
 ;read,next
 next:
 endfor
-
 
 end

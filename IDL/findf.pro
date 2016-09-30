@@ -17,7 +17,7 @@
 pro findf,field,clean=clean, ir=ir
 
 ;path_data = path0+'/data/'+field+"/"
-if keyword_set(field) then cd,'/Volumes/Kudo/DATA/WISPS/data/Par'+strtrim(field,2)
+if keyword_set(field) then cd,'$WISPDATA/data/Par'+strtrim(field,2)
 spawn, 'ls -1 *flt*.fits', flt
 if keyword_set(clean) then spawn, 'ls -1 *flt_clean.fits', flt
 

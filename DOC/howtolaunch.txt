@@ -1,12 +1,16 @@
 # 
 # How to run the WISP PIPELINE V6.1
-# Ivano Baronchelli 26 September 206
+# Ivano Baronchelli 26 September 2016
+# Updated Marc Rafelski September 30 2016
 #
 #
 # Before running everything, check the kind of data you want to
 # process. At this moment we are only able to process data with both
 # the IR filters and grisms are observed. Uvis data may or may not be
 # present.
+#
+# Also, before starting, set your paths as described in the readme
+# file. 
 #
 # -------------------------------
 # BEFORE STARTING 
@@ -20,7 +24,10 @@
 # data. The second one (data) correspond to the field where the
 # original raw data downloaded from MAST are saved. Note that once the
 # pipeline has started, the original files in the "data" folder will
-# be modified. 
+# be modified.  So you should save a copy of the data you downloaded
+# in case you want to run the pipeline again. One option is to create
+# a second folder called:
+# $PATH/download
 # In the "data" folder, the raw data should be saved in folders named
 # like (example for field 356):
 # $PATH/data/Par356
@@ -29,30 +36,32 @@
 # PREPARATION
 # -------------------------------
 #
-# Check input exposures using wispipe_initialcheck_6_1.sh
+# Check input exposures using wispipe_initialcheck.sh
 # The single exposures of all the filters will be shown in different
 # ds9 windows for different filters/grism.
 # Single exposures can be removed creating an
 # appropriate folder and moving the contaminated (or showing other
 # problems) ones in it.
 #
+# e.g. source wispipe_initialcheck.sh Par302
+#
 # -------------------------------
 # CASE 1: UVIS DATA ARE NOT PRESENT 
 # -------------------------------
 #
 # All in  a tcsh shell, Eureka environment
-# PROGRAM TO USE: wispipe_6_1.sh
+# PROGRAM TO USE: wispipe.sh
 # IN COMBINATION WITH: multiple_par.sh (if desired)
 #
 # If uvis data are not present, the pipeline can be run as follows:
 # 1) cd to the path where the WISPIPE folder is installed
 #    > cd <path-WISPIPE>/WISPIPE
 # 2) run the current version of the pipeline
-#    > source wispipe_6_1.sh Par# <path-of-aXe-and-data-folders> <path-of-wispipe-programs> > & LOG_reduction_6_1/log_Par#_6.1.log
+#    > source wispipe.sh Par# <path-of-aXe-and-data-folders> <path-of-wispipe-programs> > & LOG_reduction_6_1/log_Par#_6.1.log
 #
 # Example:
 #    > cd Users/ivano/WISPIPE
-#    > source wispipe_6_1.sh Par364 /Volumes/PROMISE_PEGASUS/TEST_DIR/DATA/WISPS /Users/ivano/WISPIPE > & log_364_6.1.log
+#    > source wispipe.sh Par364 /Volumes/PROMISE_PEGASUS/TEST_DIR/DATA/WISPS /Users/ivano/WISPIPE > & log_364_6.1.log
 #
 # The data reduction can be launched without interruptions among one
 # field and the next, using the program "multiple_par.sh", saved in
@@ -68,11 +77,12 @@
 #
 # Preprocessing in bash, astroconda  environment,
 # Reduction in  a tcsh shell, Eureka environment
-# PROGRAM TO USE: ,wispipe_uvis_preprocess_6_1.sh, wispipe_uvis_6_1.sh
-# IN COMBINATION WITH: multiple_uvis_preprocess.sh ,multiple_par.sh (if desired)
+# PROGRAM TO USE: ,wispipe_uvis_preprocess.sh, wispipe_uvis.sh
+# IN COMBINATION WITH: multiple_uvis_preprocess.sh ,multiple_par.sh
+# (if desired, in DOC)
 #
 # FIRST STEP: preprocess (bash, astroconda)
-# To preprocess the uvis data, wispipe_uvis_preprocess_6_1.sh can be
+# To preprocess the uvis data, wispipe_uvis_preprocess.sh can be
 # used. This program must be run inside a  bash shell and in an
 # astroconda environment. Read the instructions in this program and
 # modify it coherently to what is needed before run it on the data.
@@ -80,9 +90,11 @@
 # have the same characteristics (ex: all observations before 2012,
 # and both uvis filters present). To pre-process multiple fileds at
 # the same time use "multiple_uvis_preprocess.sh" but only after
-# having modified wispipe_uvis_preprocess_6_1.sh coherently with the
+# having modified wispipe_uvis_preprocess.sh coherently with the
 # sets of data that are going to be preprocessed (again:read inside this
 # program for more information)
+#
+#source wispipe_uvis_preprocess.sh Par302 $WISPDATA $WISPIPE >>LOG_reductionPar302_6.1.log
 #
 # SECOND STEP: reduction (tcsh, Eureka)
 # The reduction can be run as in the case 1 (no uvis data present),

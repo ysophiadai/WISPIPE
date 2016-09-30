@@ -1,0 +1,3 @@
+### This needs to be updated, and then the old programs need to be removed and the naming conventions fixed.
+
+findf.pro -> replaced by	findf_IB1.pro
