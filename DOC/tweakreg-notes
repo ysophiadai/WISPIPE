@@ -1,0 +1,22 @@
+Below are some notes on the tweakreg steps I digged out from the WISPIPE V5 update.  --Sophia
+
+TWEAKREG Steps summary:
+1. tweakprep.pro to generate image and catalog lists of *flt.fits, , and generate tweakprep.py
+
+2. use tweakprep.py to align *flt.fits files in each filter, separately
+
+3.1 use astrodrizzle to generate CR-removed *crclean.fits files
+3.2 use astrodrizzle to produce high S/N images in each filter
+	
+4.1 use tweaksex.pro to generate catalogs from *crclean*.fits, and generate tweakreg.py
+4.2. run SEX on the drizzled images to get their catalogs
+
+5. use tweakreg.py to 
+5.1 align *crclean* files in each filter, separately and update header
+
+5.2. run tweakreg to align the drizzled images from different filters, 
+	and to create headerlets containing new WCS information to the F110 drizzled image
+> LOOKS NORMAL =), difference between F160_flts are higher than F110_flts
+> run one more time to generate the hlet.fits files
+
+5.3. apply the new WCS keyword values in headerlets to the original flt images (both GRISM and DIRECT).
