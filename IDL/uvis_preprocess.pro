@@ -37,6 +37,8 @@
 
 pro uvis_preprocess, field, path0, pathc, darksonly=darksonly,single=single, tiger=tiger, calwf3only=calwf3only, nocte=nocte, nocalwf3=nocalwf3, mp=mp, nopostflash=nopostflash, uvis2=uvis2
 
+print, 'REMEMBER: If you are not in astroconda, you are not doing it right.'
+  
 ;/nocte, /nocalwf3  ==> copy directory only
 
 
@@ -133,8 +135,11 @@ for i=0,len-1 do begin
        spawn,'mv '+path_data+root+'_flt_hlet.fits'+' '+path_data+'UVIS_orig/'
        print,'moving '+root+'_flt.fits'+' to UVIS_orig directory'
        spawn,'mv '+path_data+root+'_flt.fits'+' '+path_data+'UVIS_orig/'
+
        print,'moving '+root+'_flc.fits'+' to UVIS_orig directory'
        spawn,'mv '+path_data+root+'_flc.fits'+' '+path_data+'UVIS_orig/'
+       print,'moving '+'*_drc.fits'+' to UVIS_orig directory'
+       spawn,'mv '+path_data+'*_drc.fits'+' '+path_data+'UVIS_orig/'
 
 
 
@@ -210,14 +215,14 @@ endif
 ; This generates the flt files needed for drizzling
 if not keyword_set(darksonly) and not keyword_set(nocte) and not keyword_set(nocalwf3) then begin
    spawn,'cp '+droppath+'runcalwf3.py '+ path_data+'UVIS/'
+   spawn,'cp '+pathc+'/IDL/cal_ref_uvis.pro '+ path_data+'UVIS/'
+   spawn,'cp '+pathc+'/IDL/read_dark_lookup.pro '+ path_data+'UVIS/'
    cd,  path_data+'UVIS/'
    if not keyword_set(nopostflash) then begin
       cal_ref_uvis, /auto, /avg, /postflash, uvis2=uvis2
    endif else begin
       cal_ref_uvis, /auto, /avg, uvis2=uvis2
    endelse
-; This is no longer supported by STScI - use astroconda
-;   spawn, 'ur_setup common ssb43l'
    spawn, './runcalwf3.py'
 endif
 
