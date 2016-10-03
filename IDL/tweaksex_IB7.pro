@@ -55,8 +55,8 @@
 ;###############################################################
 pro tweaksex_IB7,field,path0,pathconf,F140only=F140only
 
-  path = path0+'/aXe/'+field+'/'
-  configpath = pathconf+'/aXe/CONFIG/'
+  path = expand_path(path0)+'/aXe/'+field+'/'
+  configpath = expand_path(pathconf)+'/aXe/CONFIG/'
 
 ;path = '/Volumes/Kudo/DATA/WISPS/aXe/Par288-full/'
 ;tweaksex,'Par288-full','/Volumes/Kudo/DATA/WISPS'

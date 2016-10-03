@@ -32,7 +32,7 @@
 
 pro tweakprepgrism_IB6, field,path0,pathconf
 
-path = path0+'/aXe/'+field+'/'
+path = expand_path(path0)+'/aXe/'+field+'/'
 ;path = '/Volumes/Kudo/DATA/WISPS/aXe/Par288-full/'
 ;tweakprepgrism,'Par288-full','/Volumes/Kudo/DATA/WISPS'
 
@@ -269,8 +269,8 @@ printf,6,'import stwcs.wcsutil.headerlet'
 ;printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v5.pl'+'",linterp=1000,cinterp="INDEF")'
 ;printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v5.pl'+'",linterp=1000,cinterp="INDEF")'
 ; NEW bad pixel mask VERSION 6.1        ---------
-printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
-printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
+printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
+printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
 ; ------------------------------------
 
 
