@@ -3,7 +3,8 @@
 import glob
 import os
 import wfc3tools
-from wfc3tools import calwf3
+#from wfc3tools import calwf3
+from wfc3tools.calwf3 import calwf3
 from subprocess import call
 
 #from pyraf import iraf
@@ -20,7 +21,8 @@ raw = glob.glob('*_raw.fits')
 
 for f in raw:
        print "Processing %s" % (f)
+       calwf3(f)
        #calwf3.calwf3(f)
-       call(['calwf3.e',f])
+       #call(['calwf3.e',f])
 
 
