@@ -136,16 +136,16 @@ MAG_ZEROPOINT_160=25.96
 
 ;NORMAL RUN
 if TS eq '0' then begin
-path=path0+'/aXe/'+field+'/DATA/DIRECT_GRISM/'
-path1=path0+'/aXe/'+field+'/'
+   path=expand_path(path0)+'/aXe/'+field+'/DATA/DIRECT_GRISM/'
+   path1=expand_path(path0)+'/aXe/'+field+'/'
 endif
 
 ; TEST 
 if TS eq '1' then begin
-path0='../images/'
-path='../images/'
-path1='../images/'
-filed='Par364'
+   path0='../images/'
+   path='../images/'
+   path1='../images/'
+   filed='Par364'
 endif
 
 
@@ -322,9 +322,9 @@ spawn,'sex '+path1+'SEX/F1'+JHN+'0W_sci.fits -c '+path1+'SEX/config.sex -catalog
 ; covered in one of the two filters
 
 ; Flag for dual image mode and for J an H single image mode
-IF ISTHEREJ gt 0 then new_seflag,JHN,det_H,det_J,det_comb,field,path0
+IF ISTHEREJ gt 0 then new_seflag,JHN,det_H,det_J,det_comb,field,expand_path(path0)+'/'
 ; FLAG for H single image mode only 
-IF ISTHEREJ eq 0 then new_seflag,JHN,det_H,'0','0',field,path0
+IF ISTHEREJ eq 0 then new_seflag,JHN,det_H,'0','0',field,expand_path(path0)+'/'
 
 ;HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH
 ; READ SExtracted catalogs (cleaned)

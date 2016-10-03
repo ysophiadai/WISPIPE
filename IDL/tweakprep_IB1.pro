@@ -26,7 +26,7 @@
 ;###############################################################
 pro tweakprep_IB1,field,path0
 
-path = path0+'/aXe/'+field+'/'
+path = expand_path(path0)+'/aXe/'+field+'/'
 ;path = '/Volumes/Kudo/DATA/WISPS/aXe/Par288-full/'
 ;tweakprep,'Par288-full','/Volumes/Kudo/DATA/WISPS'
 

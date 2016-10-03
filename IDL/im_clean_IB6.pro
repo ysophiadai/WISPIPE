@@ -102,9 +102,9 @@ pro im_clean_IB6,field,both=both,uvis=uvis,multidrizzle=multidrizzle,F140only=F1
 ;path_data='~/data2/WISPS/data/'+field+"/" ; this is where raw data are
 
 ;;;;configpath = path0+'/aXe/CONFIG/'
-configpath = pathc+'/aXe/CONFIG/'
-path = path0+'/aXe/'
-path_data = path0+'/data/'+field+"/"
+configpath = expand_path(pathc+'/aXe/CONFIG')+'/'
+path = expand_path(path0)+'/aXe/'
+path_data = expand_path(path0)+'/data/'+field+"/"
 
 ;path="/Users/atek/Caltech/aXe/"
 ;path_data='/Volumes/data/'+field+"/"
