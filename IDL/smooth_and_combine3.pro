@@ -140,11 +140,11 @@ MAG_ZEROPOINT_160=25.96
 
 ; NORMAL RUN
 if TS eq '0' then begin
-path=path0+'/aXe/'+field+'/DATA/DIRECT_GRISM/'
+path=expand_path(path0+'/aXe/'+field+'/DATA/DIRECT_GRISM/')+'/'
 ; catalogs
-cat_110n=path0+'/aXe/'+field+'/DATA/DIRECT/'+'F110.cat'
-cat_140n=path0+'/aXe/'+field+'/DATA/DIRECT/'+'F140.cat'
-cat_160n=path0+'/aXe/'+field+'/DATA/DIRECT/'+'F160.cat'
+cat_110n=expand_path(path0+'/aXe/'+field+'/DATA/DIRECT/'+'F110.cat')
+cat_140n=expand_path(path0+'/aXe/'+field+'/DATA/DIRECT/'+'F140.cat')
+cat_160n=expand_path(path0+'/aXe/'+field+'/DATA/DIRECT/'+'F160.cat')
 endif
 
 ; TEST
