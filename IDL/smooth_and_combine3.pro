@@ -300,10 +300,10 @@ cccpro,X_WO_J, Y_WO_J, X_WO_H+mean_delta_RA, Y_WO_H+mean_delta_dec, J_H_IDX, H_J
 DRA_corr=3600.*(X_WO_J[J_H_IDX]-(X_WO_H[H_J_IDX]+mean_delta_RA))*cos(!pi*median(Y_WO_H[H_J_IDX])/180.)
 ddec_corr=3600.*(Y_WO_J[J_H_IDX]-(Y_WO_H[H_J_IDX]+mean_delta_dec))
 plot,DRA_corr,ddec_corr,position=[0.12,0.2,0.5,0.95],xtitle='Delta RA (corr)',ytitle='Delta dec (corr)',psym=3,/iso,charsize=1.2,title='J and H catalogs matching'
-oplot,[-10,10],[0,0],color=1000
-oplot,[0,0],[-10,10],color=1000
+oplot,[-10,10],[0,0],color='goldenrod'
+oplot,[0,0],[-10,10],color='goldenrod'
 plot,MAG_J[J_H_IDX],MAG_H[H_J_IDX],psym=3,xrange=[18,30],yrange=[18,30],/xst,/yst,/noerase,xtitle='J mag',ytitle='H mag',position=[0.60,0.2,0.98,0.95],/iso,charsize=1.2
-oplot,[0,100],[0,100],color=1000
+oplot,[0,100],[0,100],color='goldenrod'
 
 if TS eq '1' then fff='fff'
 if TS eq '1' then read, fff
@@ -431,7 +431,7 @@ plothist,sci_J[SEL1J],XHIST_J,YHIST_J,bin=NEWBIN_J,xrange=[5*PERC_J[0],5*PERC_J[
 
 GFJ=gaussfit(XHIST_J,YHIST_J,AA_J)
 GFIT_J=AA_J[0]*exp(-((XHIST_J-AA_J[1])^2)/(2*AA_J[2]^2))
-oplot,XHIST_J,GFIT_J,color=1000
+oplot,XHIST_J,GFIT_J,color='goldenrod'
 THJ=AA_J[1]+TH*AA_J[2]
 oplot,[THJ,THJ],[0,10*AA_J[0]],linestyle=2
 
@@ -451,7 +451,7 @@ plothist,sci_H[SEL1H],XHIST_H,YHIST_H,bin=NEWBIN_H,xrange=[5*PERC_H[0],5*PERC_H[
 
 GFH=gaussfit(XHIST_H,YHIST_H,AA_H)
 GFIT_H=AA_H[0]*exp(-((XHIST_H-AA_H[1])^2)/(2*AA_H[2]^2))
-oplot,XHIST_H,GFIT_H,color=1000
+oplot,XHIST_H,GFIT_H,color='goldenrod'
 THH=AA_H[1]+TH*AA_H[2]
 oplot,[THH,THH],[0,10*AA_H[0]],linestyle=2
 
@@ -474,7 +474,7 @@ if TS eq '1' then read, fff
 plothist, alog10((sci_J[select]/rms_J[select])/(sci_H[select]/rms_H[select])),xhistSNR,yhistSNR,bin=0.01,xrange=[-1.5,2.],xtitle='log[(S/N)_J / (S/N)_H ]', charsize=1.2
 GFSNR=gaussfit(xhistSNR,yhistSNR,AA_SNR)
 GFIT_SNR=AA_SNR[0]*exp(-((xhistSNR-AA_SNR[1])^2)/(2*AA_SNR[2]^2))
-oplot,xhistSNR,GFIT_SNR,color=1000
+oplot,xhistSNR,GFIT_SNR,color='goldenrod'
 oplot,[AA_SNR[1],AA_SNR[1]],[0,10*AA_SNR[0]],linestyle=2
 
 
@@ -639,7 +639,7 @@ exptime_H=double(strcompress(sxpar(h_H,'EXPTIME'),/remove_all))
 exptime_H=double(exptime_H)
 
 plothist,wht_J[where(wht_J gt 0 and wht_H gt 0)]/exptime_J,bin=0.01,xrange=[0,2],xtitle='(wht values) /exptime',charsize=1.2,title='white=J, red=H'
-plothist,wht_H[where(wht_H gt 0 and wht_J gt 0)]/exptime_H,bin=0.01,/overplot,color=1000
+plothist,wht_H[where(wht_H gt 0 and wht_J gt 0)]/exptime_H,bin=0.01,/overplot,color='red'
 
 if TS eq '1' then fff='fff'
 if TS eq '1' then read,fff
@@ -661,10 +661,10 @@ scale_wht_J_string=strcompress(string(scale_wht_J),/remove_all)
 scale_wht_H_string=strcompress(string(scale_wht_H),/remove_all)
 
 plothist,wht_J[where(wht_J gt 0 and wht_H gt 0)]*scale_wht_J,bin=10,xtitle='scaled WHT VALUE',title='white=J, red=H, yellow=combined (expected)'
-plothist,wht_H[where(wht_H gt 0 and wht_J gt 0)]*scale_wht_H,bin=10,/overplot,color=1000
+plothist,wht_H[where(wht_H gt 0 and wht_J gt 0)]*scale_wht_H,bin=10,/overplot,color='red'
 
 IDXT=where(wht_J gt 0 and wht_H gt 0)
-plothist,( wht_J[IDXT]*scale_wht_J*W_J + wht_H[IDXT]*scale_wht_H*W_H)/(W_J+W_H),bin=10,color=65000,/overplot
+plothist,( wht_J[IDXT]*scale_wht_J*W_J + wht_H[IDXT]*scale_wht_H*W_H)/(W_J+W_H),bin=10,color='goldenrod',/overplot
 
 
 
