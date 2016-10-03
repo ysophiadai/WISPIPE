@@ -1,12 +1,12 @@
+
+
+
 # WISPIPE
+
 HST WISP pipeline. This is used to reduce the WISP data. Current
-version is 6.1. 
+version is 6.1. Documention is in the DOC directory. Read:
 
-Documention is in the DOC directory. Read:
-
-wispipe-dr-guidline.txt
-
-howtolaunch.txt
+wispipe-dr-guidline.txt and howtolaunch.txt
 
 In addition to this, you need to setup your paths and setup pyraf.
 
@@ -24,27 +24,19 @@ files in these locations.
 .cshrc:
 
 setenv WISPIPE /Users/mrafelski/WISPIPE/
-
+setenv WISPDATA /Users/mrafelski/data/wisp/
 setenv iref ~/data/iref/
-
 setenv crrefer ~/data/synphot/
-
 setenv mtab ~/data/synphot/mtab/
-
 setenv crotacomp ~/data/synphot/comp/ota/
-
 setenv crwfc3comp ~/data/synphot/comp/wfc3/
 
 .bashrc:
 
 export WISPIPE=/Users/mrafelski/WISPIPE/
-
+export WISPDATA=/Users/mrafelski/data/wisp/
 export iref=~/data/iref/
-
 export mtab=~/data/synphot/mtab/
-
 export crrefer=~/data/synphot/
-
 export crotacomp=~/data/synphot/comp/ota/
-
 export crwfc3comp=~/data/synphot/comp/wfc3/
