@@ -51,16 +51,18 @@
 #
 # All in  a tcsh shell, Eureka environment
 # PROGRAM TO USE: wispipe.sh
-# IN COMBINATION WITH: multiple_par.sh (if desired)
+# IN COMBINATION WITH: multiple_par.sh (if desired; edit as
+# appropriate from DOC)
 #
 # If uvis data are not present, the pipeline can be run as follows:
 # 1) cd to the path where the WISPIPE folder is installed
-#    > cd <path-WISPIPE>/WISPIPE
+#    > cd $WISPIPE
 # 2) run the current version of the pipeline
-#    > source wispipe.sh Par# <path-of-aXe-and-data-folders> <path-of-wispipe-programs> > & LOG_reduction_6_1/log_Par#_6.1.log
+#    > source wispipe.sh Par# $WISPDATA $WISPIPE > & LOG/log_Par#_6.1.log
 #
 # Example:
-#    > cd Users/ivano/WISPIPE
+#    > cd $WISPIPE
+#    > source wispipe.sh Par302 $WISPDATA $WISPIPE > & LOG/log_Par302_6.1.log
 #    > source wispipe.sh Par364 /Volumes/PROMISE_PEGASUS/TEST_DIR/DATA/WISPS /Users/ivano/WISPIPE > & log_364_6.1.log
 #
 # The data reduction can be launched without interruptions among one
@@ -93,13 +95,18 @@
 # having modified wispipe_uvis_preprocess.sh coherently with the
 # sets of data that are going to be preprocessed (again:read inside this
 # program for more information)
+# MR recommends keeping a seperate UVIS log from the rest of the
+# pipeline log
 #
-#source wispipe_uvis_preprocess.sh Par302 $WISPDATA $WISPIPE >>LOG_reductionPar302_6.1.log
+# Example:
+# > cd $WISPIPE
+# > source wispipe_uvis_preprocess.sh Par302 $WISPDATA $WISPIPE >> LOG/LOG_uvis_reductionPar302_6.1.log
 #
 # SECOND STEP: reduction (tcsh, Eureka)
 # The reduction can be run as in the case 1 (no uvis data present),
-# but using the wispipe_uvis_6_1.sh program instad. Again, the
+# but using the wispipe_uvis.sh program instad. Again, the
 # reduction of multiple fields in a row can be obtained using
 # "multiple_par.sh", but ONLY AFTER the uvis data are already
 # preprocessed in a bash shell and astroconda environment.
 #
+#    > source wispipe_uvis.sh Par302 $WISPDATA $WISPIPE > & LOG/log_Par302_6.1.log
