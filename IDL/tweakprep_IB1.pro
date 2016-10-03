@@ -69,7 +69,7 @@ for i = 0, n_elements(f110_list)-1 do begin
     exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
     if exptime1 gt 1041 then det='1.9'
     if exptime1 le 1041 then det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/'+f110_list[i]+' -c '+path+'SEX/config.sex -catalog_name '+path+$
+    spawn,'sex '+path+'DATA/DIRECT/'+f110_list[i]+'[1] -c '+path+'SEX/config.sex -catalog_name '+path+$
     'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83  -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'.fits -parameters_name '+path+$
     'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
     ' -ANALYSIS_THRESH 2.0 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+' -STARNNW_NAME '+path+$
@@ -92,7 +92,7 @@ if f160_list[0] ne 'none' then begin
     h2=headfits(path+'DATA/DIRECT/'+f160_list[i]) 
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits -c '+path+'SEX/config.sex -catalog_name '+path+$
+    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits[1] -c '+path+'SEX/config.sex -catalog_name '+path+$
       'SEX/'+f160_list[i]+'.coo  -mag_zeropoint 25.96  -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits -parameters_name '+path+$
       'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
       ' -ANALYSIS_THRESH 2.0 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+$
@@ -113,7 +113,7 @@ endif else begin
     h2=headfits(path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits') 
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.0'
-   spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits'+' -c '+path+'SEX/config.sex -catalog_name '+path+$
+   spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits'+'[1] -c '+path+'SEX/config.sex -catalog_name '+path+$
          'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits'+$
          ' -parameters_name '+path+$
          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$

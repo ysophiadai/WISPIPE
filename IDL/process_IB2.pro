@@ -34,9 +34,9 @@ pro process_IB2,field,uvis=uvis, path0, pathc
 ;path="~/data2/WISPS/aXe/" ; This is where data will end up
 ;path_data='~/data2/WISPS/data/'+field+"/" ; this is where raw data are
 
-droppath = pathc+'/aXe/'
-path = path0+'/aXe/'
-path_data = path0+'/data/'+field+"/"
+droppath = expand_path(pathc)+'/aXe/'
+path = expand_path(path0)+'/aXe/'
+path_data = expand_path(path0)+'/data/'+field+"/"
 
 spawn,'mkdir '+path+field
 path2=path+field+"/"
@@ -262,7 +262,7 @@ print,filter
      ;============================================= 
    if keyword_set(uvis) then begin
 ; spawn,'cp '+pathc+'/aXe/tweakreg_uvis.py '+path2+'DATA/UVIS' ; Removed by I.B. (now written in align_uvis.pro)
-        spawn,'cp '+pathc+'/aXe/make_uvis_helpfile.py '+path2+'DATA/UVIS'
+        spawn,'cp '+expand_path(pathc)+'/aXe/make_uvis_helpfile.py '+path2+'DATA/UVIS'
         spawn, 'ls -1 '+path2+'DATA/UVIS/*flt.fits',uvis_list
         for m=0,n_elements(uvis_list)-1 do begin
            name=uvis_list(m)
