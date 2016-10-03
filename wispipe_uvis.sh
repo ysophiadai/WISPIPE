@@ -12,7 +12,7 @@
 
 
 
-ur_setup 
+ur_setup common primary
 cd $3/IDL/
 
  
@@ -50,7 +50,7 @@ EOF
 cd $2/aXe/$1/
 # cp $3/aXe/fit_multi_sky.py .
 cp $3/PYTHON/fit_multi_sky.py .
-python fit_multi_sky.py “$WISPIPE/aXe/CONFIG/grism_master_sky_v0.5/"
+python fit_multi_sky.py "$WISPIPE/aXe/CONFIG/grism_master_sky_v0.5/"
 ##########################################################################
 # sky subtraction - END
 ##########################################################################

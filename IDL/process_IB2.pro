@@ -43,7 +43,8 @@ path2=path+field+"/"
 path3=path2+'DATA/DIRECT_GRISM/'
 print,"working in directory  ",path2
 
-spawn,'mkdir '+path_data+"UVIS"
+;spawn,'mkdir '+path_data+"UVIS"
+;;;;; Removed this line - it shold not do that. MR 10/3/2016
 spawn,'mkdir '+path2+"G102_OUTPUT"
 spawn,'mkdir '+path2+"G102_DRIZZLE"
 spawn,'mkdir '+Path2+"G141_OUTPUT"
@@ -62,14 +63,19 @@ spawn,'cp -r '+droppath+'SEX '+path2
 spawn,'cp '+droppath+'G*_axe_F140.py '+path2 ; this is only needed for cycle 19 with 1 IR filter
 spawn,'cp '+droppath+'G*_axe*.py '+path2
 ;spawn,'cp '+droppath+'iolprepmanual.py '+path2; this is no longer needed
-spawn,'cp ~/WISPIPE/login.cl '+path2
-spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/GRISM/'
-spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/DIRECT_GRISM/'
 ;spawn,'cp '+path+'skysub/skysub_all*.cl '+path2+'DATA/GRISM/'
+
+
+;spawn,'cp ~/WISPIPE/login.cl '+path2
+;spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/GRISM/'
+;spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/DIRECT_GRISM/'
+;;;;; Removed these lines - it shold not do that. MR 10/3/2016
+
 
 ;for UVIS
 spawn,'mkdir '+path2+"DATA/UVIS"
-spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/UVIS/'
+;spawn,'cp ~/WISPIPE/login.cl '+path2+'DATA/UVIS/'
+;;;;; Removed these lines - it shold not do that. MR 10/3/2016
 spawn,'mkdir '+path2+"DATA/UVIS/IRtoUVIS"
 spawn,'mkdir '+path2+"DATA/UVIS/UVIStoIR"
 
