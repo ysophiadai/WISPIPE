@@ -21,20 +21,20 @@
 ###########################################################################################################################
 
 cd ~/WISPIPE
-source wispipe_6_1.sh Par1 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_1_6.1.log
+source wispipe_6_1.sh Par1 > & LOG/log_1_6.1.log
 cd ~/WISPIPE
-source wispipe_6_1.sh Par3 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_3_6.1.log
+source wispipe_6_1.sh Par3 > & LOG/log_3_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par4 > & LOG/log_4_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par5 > & LOG/log_5_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par6 > & LOG/log_6_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par7 > & LOG/log_7_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par8 > & LOG/log_8_6.1.log
+cd ~/WISPIPE		   
+source wispipe_6_1.sh Par9 > & LOG/log_9_6.1.log
 cd ~/WISPIPE
-source wispipe_6_1.sh Par4 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_4_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par5 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_5_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par6 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_6_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par7 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_7_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par8 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_8_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par9 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_9_6.1.log
-cd ~/WISPIPE
-source wispipe_6_1.sh Par10 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE > & LOG_reduction_6_1/log_10_6.1.log
+source wispipe_6_1.sh Par1 > & LOG/log_10_6.1.log

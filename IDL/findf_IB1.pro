@@ -16,7 +16,7 @@
 
 pro findf_IB1,field, path,clean=clean, ir=ir
 ;path_data = path0+'/data/'+field+"/"
-if keyword_set(field) then cd,path+'/data/'+strtrim(field,2)
+if keyword_set(field) then cd,expand_path(path)+'/data/'+strtrim(field,2)
 spawn, 'ls -1 *flt*.fits', flt
 print, flt
 if keyword_set(clean) then spawn, 'ls -1 *flt_clean.fits', flt

@@ -38,29 +38,34 @@ IDL > spawn,'mv icdxd3l2q*.* badframes'
 run uvis_preprocess in IDL 
 
 step 2.1: check
-IDL > uvis_preprocess,'Par260','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE' ,/darksonly
 
+------------ This tells you what darks you need:
+IDL > uvis_preprocess,'Par260',/darksonly
 
 step 2.2: process
--------- use uvis_preprocess, .....,  /nopostflash before Oct, 2012--------
-IDL > uvis_preprocess,'Par258',/mp,'/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/nopostflash
+-------- use uvis_preprocess, .....,  /nopostflashbefore Oct, 2012--------
+IDL > uvis_preprocess,'Par258',/nopostflash
 
 -------- use uvis_preprocess, .....,  /single, if only 1 UVIS filter--------
-IDL > uvis_preprocess,'Par346','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/mp,/single
+IDL > uvis_preprocess,'Par346',/single
 
 -------- use uvis_preprocess, .....,  /calwf3only,  if everything run through, but stopped at the calwfc3 step--------
-IDL > uvis_preprocess,'Par358','/Volumes/Kudo/DATA/WISPS', '~/WISPIPE',/mp,/calwf3only
+IDL > uvis_preprocess,'Par358',calwf3only
 
 
 
 
 ========== step3  (IDL and ureka needed) ==========
 run wispipe_*.sh
-%./wispipe.sh ParXXX $PATH1 $PATH/WISPIPE > & log-206-160310-1810.txt 
- 
-- PATH1 
-	the directory with the following structure:
-- $PATH 
+#######%./wispipe.sh ParXXX $PATH1 $PATH/WISPIPE > & log-206-160310-1810.txt 
+
+NEW: 
+%./wispipe.sh ParXXX> & log-206-160310-1810.txt
+
+
+#########- PATH1 
+#########	the directory with the following structure:
+#########- $PATH 
 	has two subdirectories:  
 $PATH/aXe/	         for reduced data
 $PATH/data/          for raw data, where ParXXX should be ready before processing

@@ -1,7 +1,6 @@
 # 
 # How to run the WISP PIPELINE V6.1
 # Ivano Baronchelli 26 September 2016
-# Updated Marc Rafelski September 30 2016
 #
 #
 # Before running everything, check the kind of data you want to
@@ -32,6 +31,12 @@
 # like (example for field 356):
 # $PATH/data/Par356
 #
+# See the readme on the github page in order to setup your path
+# correctly before starting.
+#
+# Also, currently tweakreg needs to have interactive = False set as
+# your default before running the pipeline.
+#
 # -------------------------------
 # PREPARATION
 # -------------------------------
@@ -58,12 +63,11 @@
 # 1) cd to the path where the WISPIPE folder is installed
 #    > cd $WISPIPE
 # 2) run the current version of the pipeline
-#    > source wispipe.sh Par# $WISPDATA $WISPIPE > & LOG/log_Par#_6.1.log
+#    > source wispipe.sh Par# > & LOG/log_Par#_6.1.log
 #
 # Example:
 #    > cd $WISPIPE
-#    > source wispipe.sh Par302 $WISPDATA $WISPIPE > & LOG/log_Par302_6.1.log
-#    > source wispipe.sh Par364 /Volumes/PROMISE_PEGASUS/TEST_DIR/DATA/WISPS /Users/ivano/WISPIPE > & log_364_6.1.log
+#    > source wispipe.sh Par302 > & LOG/log_Par302_6.1.log
 #
 # The data reduction can be launched without interruptions among one
 # field and the next, using the program "multiple_par.sh", saved in
@@ -100,7 +104,13 @@
 #
 # Example:
 # > cd $WISPIPE
-# > source wispipe_uvis_preprocess.sh Par302 $WISPDATA $WISPIPE >> LOG/LOG_uvis_reductionPar302_6.1.log
+# > source wispipe_uvis_preprocess.sh Par302 >> LOG/LOG_uvis_reductionPar302_6.1.log
+#
+# MR NOTE: I personally would just run the IDL program
+# directly. wispipe_uvis_preprocess.sh just calls a single IDL
+# program, and this is a waste and doesn't work well since it has to
+# edited every time you run it for a different setup. it is better to
+# call the IDL program with different flags. Fix this. 
 #
 # SECOND STEP: reduction (tcsh, Eureka)
 # The reduction can be run as in the case 1 (no uvis data present),
@@ -109,4 +119,4 @@
 # "multiple_par.sh", but ONLY AFTER the uvis data are already
 # preprocessed in a bash shell and astroconda environment.
 #
-#    > source wispipe_uvis.sh Par302 $WISPDATA $WISPIPE > & LOG/log_Par302_6.1.log
+#    > source wispipe_uvis.sh Par302 > & LOG/log_Par302_6.1.log
