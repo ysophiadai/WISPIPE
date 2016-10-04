@@ -24,11 +24,11 @@
 # these here below are just examples. Sobstitute them before starting with a new set of Par fields.
 
 cd ~/WISPIPE
-source wispipe_uvis_preprocess_6_1.sh Par63 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE >>LOG_reduction_6_1/log_63_6.1.log
+source wispipe_uvis_preprocess_6_1.sh Par63 >>LOG_reduction_6_1/log_63_6.1.log
 
 cd ~/WISPIPE
-source wispipe_uvis_preprocess_6_1.sh Par64 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE >>LOG_reduction_6_1/log_64_6.1.log
+source wispipe_uvis_preprocess_6_1.sh Par64 >>LOG_reduction_6_1/log_64_6.1.log
 
 cd ~/WISPIPE
-source wispipe_uvis_preprocess_6_1.sh Par66 /Volumes/PROMISE_PEGASUS/DATA_V6/WISPS /Users/ivano/WISPIPE >>LOG_reduction_6_1/log_66_6.1.log
+source wispipe_uvis_preprocess_6_1.sh Par66 >>LOG_reduction_6_1/log_66_6.1.log
  

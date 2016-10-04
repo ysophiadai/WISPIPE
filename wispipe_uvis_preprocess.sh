@@ -19,7 +19,7 @@
 
 
 
-cd $3/IDL/
+cd $WISPIPE/IDL/
 echo "========================================================="
 echo "Before this task you should check the input files using "
 echo "findf.pro"
@@ -35,7 +35,7 @@ echo "========================================================="
 ########     ### ------------------------------------------------
 ########     ###  Check the names of the darks required
 ########     ### ------------------------------------------------
-########     #   idl -e "uvis_preprocess,'$1','$2','$3',/darksonly"
+########     #   idl -e "uvis_preprocess,'$1',/darksonly"
 ########     ### ------------------------------------------------
 ########     
 ########     
@@ -48,10 +48,10 @@ echo "========================================================="
 ########     ###  Case 1: both uvis filters are present
 ########     ### ------------------------------------------------
 ########     ### 1A) OBSERVATIONS BEFORE OCTOBER 2012
-idl -e "uvis_preprocess,'$1','$2','$3', /uvis2,/mp,/nopostflash"
+########     # idl -e "uvis_preprocess,'$1', /nopostflash"
 ########     ### ------------------------------------------------
 ########     ### 1B) OBSERVATIONS AFTER OCTOBER 2012
-########     #   idl -e "uvis_preprocess,'$1','$2','$3',/uvis2,/mp"
+   idl -e "uvis_preprocess,'$1'"
 ########     ### ------------------------------------------------
 ########     
 ########     
@@ -59,10 +59,10 @@ idl -e "uvis_preprocess,'$1','$2','$3', /uvis2,/mp,/nopostflash"
 ########     ###  Case 2: only one uvis filter is observed
 ########     ### ------------------------------------------------
 ########     ### 2A) OBSERVATIONS BEFORE OCTOBER 2012
-########     #   idl -e "uvis_preprocess,'$1','$2','$3', /uvis2,/mp,/single,/nopostflash"
+########     #   idl -e "uvis_preprocess,'$1',/single,/nopostflash"
 ########     ### ------------------------------------------------
 ########     ### 2B) OBSERVATIONS AFTER OCTOBER 2012
-########     #   idl -e "uvis_preprocess,'$1','$2','$3', /uvis2,/mp,/single"
+########     #   idl -e "uvis_preprocess,'$1',/single"
 ########     ### ------------------------------------------------
 ########     
 ########       
@@ -74,5 +74,5 @@ idl -e "uvis_preprocess,'$1','$2','$3', /uvis2,/mp,/nopostflash"
 ########     #### ------------------------------------------------
 ########     #### If everything worked, apart for calwf3:
 ########     #### ------------------------------------------------
-########     #    idl -e "uvis_preprocess,'$1','$2','$3',/uvis2,/mp,/calwf3only"
+########     #    idl -e "uvis_preprocess,'$1',/calwf3only"
 ########     #### ------------------------------------------------

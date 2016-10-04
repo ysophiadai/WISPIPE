@@ -31,14 +31,26 @@
 
 ; use /uvis2 when processing data with the new headers from UVIS 2.0 -
 ; otherwise it will not work on newly downloaded data. 
+; New default - use uvis2 and multiprocessor unless specify otherwise
 
-;uvis_preprocess, 'Par358', '/Volumes/PROMISE_PEGASUS/TEST_DIR/DATA/WISPS', '/Users/ivano/WISPIPE', /uvis2,/mp
+; use /sp to run on a single processor, by default /mp is now called.
+; use /olduvis to run it on data with old headers from UVIS 1.0 (pre UVIS 2.0)
 
+;Example running this program:
+;uvis_preprocess, 'Par358'
 
-pro uvis_preprocess, field, path0, pathc, darksonly=darksonly,single=single, tiger=tiger, calwf3only=calwf3only, nocte=nocte, nocalwf3=nocalwf3, mp=mp, nopostflash=nopostflash, uvis2=uvis2
+pro uvis_preprocess, field, darksonly=darksonly,single=single, tiger=tiger, calwf3only=calwf3only, nocte=nocte, nocalwf3=nocalwf3, mp=mp, nopostflash=nopostflash, uvis2=uvis2, olduvis=olduvis, sp=sp
 
-print, 'REMEMBER: If you are not in astroconda, you are not doing it right.'
+; New default - use uvis2 and multiprocessor unless specify otherwise
+  if not keyword_set(olduvis) then uvis2=1
+  if not keyword_set(sp) then mp = 1
+
   
+print, 'REMEMBER: If you are not in astroconda, you are not doing it right.'
+
+path0 = expand_path('$WISPDATA')
+pathc = expand_path('$WISPIPE')
+
 ;/nocte, /nocalwf3  ==> copy directory only
 
 
