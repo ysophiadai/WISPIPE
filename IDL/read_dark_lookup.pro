@@ -5,7 +5,7 @@
 
 function read_dark_lookup, julend, binned=binned, smooth=smooth, postflash=postflash, avg=avg
 
-  dir = '$WISPIPE/IDL/'
+  dir = expand_path('$WISPIPE/IDL/')
 ;  if keyword_set(binned) then begin
 ;     if keyword_set(smooth) then file = 'dark_lookup_binned_smoothed.txt'  else file = 'dark_lookup_binned.txt' 
 ;     endif else begin
