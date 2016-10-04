@@ -177,8 +177,8 @@ EOF
 ##########################################################################
 cd $2/aXe/$1/
 cp $3/PYTHON/WISP_grism_region_files.py .
-python WISP_grism_region_files.py G102 -c "/Users/ivano/WISPIPE/aXe/CONFIG/"
-python WISP_grism_region_files.py G141 -c "/Users/ivano/WISPIPE/aXe/CONFIG/"
+python WISP_grism_region_files.py G102 -c "$WISPIPE/aXe/CONFIG/"
+python WISP_grism_region_files.py G141 -c "$WISPIPE/aXe/CONFIG/"
 #usage: WISP_grism_region_files.py [-h] [-f FILTER] [-c CONFIG] [-p PAR_DIR] grism
 ##########################################################################
 

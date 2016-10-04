@@ -22,7 +22,7 @@ PRO axe_sing_IB1,field,beam,n,shift,trim,SAVE=SAVE,path0,NOPLOT=NOPLOT
  bin=1.
 
 ;  path="~/data2/WISPS/aXe/"+field+"/"
-  path = path0+'/aXe/'+field+"/"
+  path = expand_path(path0)+'/aXe/'+field+"/"
   G102_path=path+"/G102_DRIZZLE/"
   G141_path=path+"/G141_DRIZZLE/"
 
@@ -51,7 +51,7 @@ PRO axe_sing_IB1,field,beam,n,shift,trim,SAVE=SAVE,path0,NOPLOT=NOPLOT
          readcol,path+'DATA/DIRECT_GRISM/G141_1st.txt',g141_x,g141_y,g141_1_beam,format=('f,f,i'),/silent 
        
 !p.font=0
-beam_pet,field,beam,pet_a,pet_b,/both,path0
+beam_pet,field,beam,pet_a,pet_b,/both,expand_path(path0)
 ;convert pet_a & pet_b to the larger scale, added by SD 2015.8
 pet_a = 1.60318*pet_a
 pet_b = 1.60318*pet_b

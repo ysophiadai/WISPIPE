@@ -40,9 +40,9 @@ def set_aXe_environment():
 
     # os.environ['AXE_CONFIG_PATH'] = '../CONFIG/'
     # print '--> variable AXE_CONFIG_PATH  set to "../CONFIG/"'
-    os.environ['AXE_CONFIG_PATH'] = '$WISPIPE/aXe/CONFIG/'
-    print '--> variable AXE_CONFIG_PATH  set to "/Users/$WISPIPE/aXe/CONFIG/"'
+    os.environ['AXE_CONFIG_PATH'] = os.path.expandvars('$WISPIPE')+'aXe/CONFIG/'
     
+
     os.environ['AXE_OUTPUT_PATH'] = GRISM+'_OUTPUT/'
     print '--> variable AXE_OUTPUT_PATH  set to "GRISM_OUTPUT/"'
     
@@ -134,7 +134,7 @@ def aXe_noback_drizzle_f140():
     owd = os.getcwd()
     os.chdir('./DATA/DIRECT_GRISM/')
     
-    iraf.fixpix(images="@F140_clean.list//[1]%'",masks="$WISPIPE/aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF")
+    iraf.fixpix(images="@F140_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+"aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF")
     iraf.combine(input="@F140_clean.list//[1]%'",output="F140.fits",combine="median")
     
 ############################################################
@@ -223,8 +223,8 @@ def aXe_noback_drizzle_f160():
     # ============================   
     owd = os.getcwd()
     os.chdir('./DATA/DIRECT_GRISM/')
-    
-    iraf.fixpix(images="@F160_clean.list//[1]%'",masks="$WISPIPE/aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF")
+
+    iraf.fixpix(images="@F160_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+'aXe/CONFIG/bp_mask_v6.pl',linterp=1000,cinterp="INDEF")
     iraf.combine(input="@F160_clean.list//[1]%'",output="F160.fits",combine="median")
     
 ############################################################

@@ -38,8 +38,8 @@ def set_aXe_environment():
 
     # os.environ['AXE_CONFIG_PATH'] = '../CONFIG/'
     # print '--> variable AXE_CONFIG_PATH  set to "../CONFIG/"'
-    os.environ['AXE_CONFIG_PATH'] = '$WISPIPE/aXe/CONFIG/'
-    print '--> variable AXE_CONFIG_PATH  set to "$WISPIPE/aXe/CONFIG/"'
+    os.environ['AXE_CONFIG_PATH'] = os.path.expandvars('$WISPIPE')+'aXe/CONFIG/'
+    print '--> variable AXE_CONFIG_PATH  set to "'+os.path.expandvars('$WISPIPE')+'aXe/CONFIG/"'
 
     os.environ['AXE_OUTPUT_PATH'] = GRISM+'_OUTPUT/'
     print '--> variable AXE_OUTPUT_PATH  set to "GRISM_OUTPUT/"'
@@ -130,7 +130,7 @@ def aXe_noback_drizzle():
     owd = os.getcwd()
     os.chdir('./DATA/DIRECT_GRISM/')
 
-    iraf.fixpix(images="@F110_clean.list//[1]%'",masks="$WISPIPE/aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF") # Removed v3 (done in tweakprepgrism.pro(py))
+    iraf.fixpix(images="@F110_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+"aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF") # Removed v3 (done in tweakprepgrism.pro(py))
     iraf.combine(input="@F110_clean.list//[1]%'",output="F110.fits",combine="median")
 
 ############################################################

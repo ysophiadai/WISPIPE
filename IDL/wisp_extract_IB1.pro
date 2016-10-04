@@ -27,7 +27,7 @@
 
 pro wisp_extract_IB1,field,trim, path0
       
-path = path0+'/aXe/'+field+"/"
+path = expand_path(path0)+'/aXe/'+field+"/"
 
 
 IF FILE_TEST(path+'DATA/DIRECT_GRISM/cat_F160.cat') eq 1 then catname=path+'DATA/DIRECT_GRISM/cat_F160.cat'
@@ -106,12 +106,12 @@ while n lt n_elements(object) do begin
                  if object[n] ge 20000 and object[n] lt 30000 then max2=max2+1
                  if object[n] ge 30000 then max3=max3+1
               ENDIF
-               axe_sing_IB1,field,beam,n,shift,trim,/save,path0
+               axe_sing_IB1,field,beam,n,shift,trim,/save,expand_path(path0)
                shift=shift+1
             endif
 
             if YN eq 'N' then begin
-               axe_sing_IB1,field,beam,n,shift,trim,/save,path0,/noplot
+               axe_sing_IB1,field,beam,n,shift,trim,/save,expand_path(path0),/noplot
                RR=RR-1   
             endif
             

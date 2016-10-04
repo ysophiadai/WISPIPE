@@ -15,7 +15,7 @@ print, "------------------------"
 print, "mk_region_direct"
 print, "------------------------"
   
-path =  path0+'/aXe/'+field+"/"
+path =  expand_path(path0)+'/aXe/'+field+"/"
 
 ; F110
 readcol,path+'DATA/DIRECT_GRISM/F110_clean.list',f110_list,format=('A')

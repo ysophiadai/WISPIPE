@@ -12,7 +12,7 @@
 ;###############################################################
 PRO rename_cat, field,path0
 
-path = path0+'/aXe/'+field+'/' 
+path = expand_path(path0)+'/aXe/'+field+'/' 
 
 readcol,path+'DATA/DIRECT_GRISM/F160_clean.list',f160_list,format=('A')
 

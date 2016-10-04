@@ -11,7 +11,7 @@
 pro beam_pet,field,beam,pet_a,pet_b,both=both, path0
 
   ;path="~/data2/WISPS/aXe/"+field+"/"
-  path = path0+'/aXe/'+field+"/"
+  path = expand_path(path0)+'/aXe/'+field+"/"
   g102_path=path+'G102_OUTPUT/'
   g141_path=path+'G141_OUTPUT/'
   beam_id=STRING(beam,Format='(I0.3)')+'A'

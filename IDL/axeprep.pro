@@ -10,7 +10,7 @@ pro axeprep,field,both=both,path0
 ;###############################################################
 
 ;path="~/data2/WISPS/aXe/"+field+"/"
-path = path0+'/aXe/'+field+"/"
+path = expand_path(path0)+'/aXe/'+field+"/"
 path_data=path+'DATA/DIRECT_GRISM/'
 
 spawn, 'ls -1 '+path+'DATA/DIRECT_GRISM/i*flt_clean.fits',all
