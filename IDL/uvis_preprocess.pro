@@ -94,13 +94,16 @@ for i=0,len-1 do begin
   h=headfits(name) 
   filter=strcompress(sxpar(h,'FILTER'),/remove_all)    
   filterlist[i] = filter
+  EXPEND = double(strtrim(sxpar(h, 'EXPEND'),2))
 
   
   if (filter eq 'F475X' or filter eq 'F600LP' or filter eq 'F606W' or filter eq 'F814W' ) then begin 
      
      ; Store the original dark name for screen output
     dark=strmid(strcompress(sxpar(h,'DARKFILE'),/remove_all),5,13)
-    darkfilearr[i] = dark
+    ;darkfilearr[i] = dark
+    darkfilearr[i] = read_dark_lookup(expend,smooth=smooth,postflash=postflash,avg=avg)
+
     if not keyword_set(darksonly) then begin
 
       ; Make a new name for the dark, and
@@ -169,7 +172,7 @@ diffdark = uniq(darkfiles)
 
 darksneeded = darkfiles[diffdark]
 print, '---------------------------------------------------------'
-print, 'Make sure you process the following darks:'
+print, 'Make sure you process the following darks (original names):'
 print, darksneeded
 print, '---------------------------------------------------------'
 
