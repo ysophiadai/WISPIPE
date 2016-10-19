@@ -94,7 +94,13 @@
 # modify it coherently to what is needed before run it on the data.
 # Multiple fields can be pre-processed in a row if they
 # have the same characteristics (ex: all observations before 2012,
-# and both uvis filters present). To pre-process multiple fileds at
+# and both uvis filters present).
+#
+# Run IDL program to run mutiple fields, e.g.:
+# multiple_uvis_preprocess, ['Par302', 'Par303', 'Par304']
+#
+######### Begin Depreciated ###########
+#To pre-process multiple fileds at
 # the same time use "multiple_uvis_preprocess.sh" but only after
 # having modified wispipe_uvis_preprocess.sh coherently with the
 # sets of data that are going to be preprocessed (again:read inside this
@@ -111,6 +117,8 @@
 # program, and this is a waste and doesn't work well since it has to
 # edited every time you run it for a different setup. it is better to
 # call the IDL program with different flags. Fix this. 
+#
+######### End Depreciated ###########
 #
 # SECOND STEP: reduction (tcsh, Eureka)
 # The reduction can be run as in the case 1 (no uvis data present),
