@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# OBSOLUTE! Replaced by IDL program mutiple_uvis_preprocess.pro
+# OBSOLETE! Replaced by IDL program mutiple_uvis_preprocess.pro
 # Call that program instead with a list of fields.
 #
 #

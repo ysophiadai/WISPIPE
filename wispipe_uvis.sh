@@ -3,7 +3,7 @@
 # WISPIPE
 # Reduction Pipeline for the WISP program
 # Hakim Atek 2009
-# Modified by Marc Rafelski 2012
+# Modified by Marc Rafelski 2012,2016
 # Modified by Sophia Dai 2014,2015
 # Modified by Ivano Baronchelli, 2016
 # Run when UVIS data is present instead of wispipe.sh
@@ -13,10 +13,9 @@
 # Call in csh:  ./wispipe_uvis.sh Par# > & log#-[datetime].log
 ###############################################################
 
-ur_setup common primary
+ur_setup
 cd $WISPIPE/IDL/
 
- 
 idl<< EOF
 .run process_IB2.pro
 process_IB2, "$1",/uvis,"$WISPDATA","$WISPIPE"
