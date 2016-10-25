@@ -1,3 +1,6 @@
+#########################################
+# OUTDATED. Look at README.txt instead
+########################################
 # 
 # How to run the WISP PIPELINE V6.1
 # Ivano Baronchelli 26 September 2016

@@ -1,3 +1,7 @@
+#########################################
+# OUTDATED. Look at README.txt instead
+########################################
+
 Readme.txt
 Guidance on how to use the WISP pipeline for data reduction
 Created by Sophia Dai

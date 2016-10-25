@@ -175,7 +175,6 @@ if keyword_set(script) then goto, script
 
 ; clean direct images
 ;*******************************************************
-
       print,"Sigma-rejection cleaning of direct images ....."
       clean_direct,direct_list                           ;all files in /DATA/DIRECT folder
       

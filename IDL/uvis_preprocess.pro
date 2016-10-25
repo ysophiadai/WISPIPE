@@ -39,7 +39,7 @@
 ;Example running this program:
 ;uvis_preprocess, 'Par358'
 
-pro uvis_preprocess, field, darksonly=darksonly,single=single, tiger=tiger, calwf3only=calwf3only, nocte=nocte, nocalwf3=nocalwf3, mp=mp, nopostflash=nopostflash, uvis2=uvis2, olduvis=olduvis, sp=sp
+pro uvis_preprocess, field, darksonly=darksonly, tiger=tiger, calwf3only=calwf3only, nocte=nocte, nocalwf3=nocalwf3, mp=mp, nopostflash=nopostflash, uvis2=uvis2, olduvis=olduvis, sp=sp
 
 ; New default - use uvis2 and multiprocessor unless specify otherwise
   if not keyword_set(olduvis) then uvis2=1
@@ -51,29 +51,12 @@ print, 'REMEMBER: If you are not in astroconda, you are not doing it right.'
 path0 = expand_path('$WISPDATA')
 pathc = expand_path('$WISPIPE')
 
-;/nocte, /nocalwf3  ==> copy directory only
-
-
-;droppath="~/Dropbox/IPAC/WISPS/WISPIPE/aXe/" ; for copying files
-;path="~/data2/WISPS/aXe/" ; This is where data will end up
-;path_data='~/data2/WISPS/data/'+field+"/" ; this is where raw data are
-;path_data_uvis='~/data2/WISPS/data/'+field+"/UVIS/"
 path = path0+'/aXe/'
 path_data = path0+'/data/'+field+"/"
 droppath = pathc+'/aXe/'
 
-;below added by Sophia Dai in 2015 to copy the original files back to the
-;data folder
-; keyword single added for fields with single UVIS band at field > 300
 if not keyword_set(calwf3only) then begin
 
-   ;;;; Commented the below out since we want to reprocess everything
-   ;;;; with the new UVIS 2.0 methodology
-   
-;if field gt 'Par200' and field ne 'Par330' and not keyword_set(single) and field le 'Par357' then begin
-;   spawn,'cp '+path_data+"UVIS_orig/*.* "+path_data
-;   spawn,'mv '+path_data+"UVIS "+path_data+"UVIS_pre2015"
-;endif
 
 if not keyword_set(darksonly) then begin
    spawn,'mkdir '+path_data+"UVIS"
@@ -117,7 +100,7 @@ for i=0,len-1 do begin
        ;;;;;; it has postflash darks
 
 ;       if (prename eq 'x' or prename eq 'y' or prename eq 'z') and newdark ne 'x2819400i_drk' then strput, newdark, 'p', 0 ; this is for the postflash darks
-       if (prename eq 'x' or prename eq 'y' or prename eq 'z' or prename eq '0') and newdark ne 'x2819400i_drk' then strput, newdark, 'p', 0 ; this is for the postflash darks
+       if (prename eq 'x' or prename eq 'y' or prename eq 'z' or prename eq '0' or prename eq '1') and newdark ne 'x2819400i_drk' then strput, newdark, 'p', 0 ; this is for the postflash darks
        if newdark eq 'w971325mi_drk' or newdark eq 'w9k1521si_drk' or newdark eq 'wb81559si_drk' or newdark eq 'wb81559ri_drk' then strput, newdark, 'p', 0 ; this is for the few pre 2013 that have pf darks
        strput, newdark, 'a', 1                                ; this is for averaged darks (not smoothed darks)
        
