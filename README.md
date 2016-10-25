@@ -6,9 +6,9 @@
 HST WISP pipeline. This is used to reduce the WISP data. Current
 version is 6.1. Documention is in the DOC directory. Read:
 
-wispipe-dr-guidline.txt and howtolaunch.txt
+DOC/README.txt
 
-In addition to this, you need to setup your paths and setup pyraf.
+As described in this file, you need to setup your paths and setup pyraf.
 
 For pyraf, make sure you have an iraf directory in ~/. In that
 directory, make sure you have a login.cl file. An example login.cl
