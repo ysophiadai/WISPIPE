@@ -129,6 +129,7 @@ Then whenever you want it, type: source activate astroconda (in BASH only!!)
  the IR filters and grisms observed. UVIS data may or may not be present.
 
  2) Check input exposures using wispipe_initialcheck.sh
+  (or use findf.pro in IDL directory). 
  The single exposures of all the filters will be shown in different
  ds9 windows for different filters/grism.
  Single exposures can be removed creating an
