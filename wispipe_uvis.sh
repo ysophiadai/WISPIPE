@@ -1,4 +1,4 @@
-#!/bin/csh
+#!/bin/bash
 ##############################################################
 # WISPIPE
 # Reduction Pipeline for the WISP program

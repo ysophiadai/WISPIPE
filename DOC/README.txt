@@ -3,6 +3,7 @@
  Sophia Dai's wispipe-dr-guideline.txt
  Marc Rafelski October 2016
 
+New update: Now use the bash shell for everything. (Both Euereka and astroconda)
 
  -------------------------------
  SYSTEM REQUIREMENTS / INSTALL TIPS
@@ -29,6 +30,10 @@ install astroconda in python
 
 
 Then whenever you want it, type: source activate astroconda (in BASH only!!)
+
+Remember: Do not have both Ureka and astroconda active at the same
+time. You can do ur_forget or source deactivate astroconda to remove
+one or the other.
 
  -------------------------------
  BEFORE STARTING / SETUP
@@ -77,6 +82,9 @@ Then whenever you want it, type: source activate astroconda (in BASH only!!)
  export crrefer=~/data/synphot/
  export crotacomp=~/data/synphot/comp/ota/
  export crwfc3comp=~/data/synphot/comp/wfc3/
+
+Note: We have now switched completely to bash, but I have not tested
+if it is not necessary to set the paths of the .cshrc or not. 
 
  4) Make sure you have synphot installed
  http://www.stsci.edu/institute/software_hardware/stsdas/synphot
@@ -156,7 +164,7 @@ For field with F140 + G102 + G141 filters, use wispipe_F140.sh
  CASE 1: UVIS DATA ARE NOT PRESENT 
  -------------------------------
 
- All in  a tcsh shell, Eureka environment
+ All in  a bash shell, Eureka environment
  PROGRAM TO USE: wispipe.sh
 
  If uvis data are not present, the pipeline can be run as follows:
@@ -183,7 +191,7 @@ Note: Can use multiple_par.sh to run multiple at once; edit as appropriate from 
  -------------------------------
 
  Preprocessing in bash, astroconda  environment,
- Reduction in  a tcsh shell, Eureka environment
+ Reduction in  a bash shell, Eureka environment
  PROGRAM TO USE:, uvis_preprocess.pro or multiple_uvis_preprocess.pro,
  wispipe_uvis.sh
 

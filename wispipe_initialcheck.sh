@@ -1,4 +1,8 @@
-#!/bin/csh
+#!/bin/bash
+#
+# I recommend instead just running the idl program itself. findf.pro has been modified to work with the new git pipeline
+# So you can just run in idl: findf, 'ParXXX'
+#
 ##############################################################
 # WISPIPE
 # Ivano Baronchelli, 2016
