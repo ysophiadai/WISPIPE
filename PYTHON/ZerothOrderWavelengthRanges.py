@@ -44,7 +44,6 @@ class ZerothOrderWavelengthRanges():
     """
 
     def __init__(self,
-                 drizzledStampPath,
                  zerothOrderRegionFilePath,
                  sextractorCatalogueFilePath,
                  posAngleCorrection = 0.0,
@@ -54,8 +53,6 @@ class ZerothOrderWavelengthRanges():
         Constructor:
 
         Positional Arguments:
-
-        drizzledStampPath -- The path of the drizzled, wavelength-calibrated stamp FITS file.
 
         zerothOrderRegionFilePath -- The path of the SAO DS9 format region file specifying the
         positions of the zeroth order dispersion images in the appropriate full, drizzled grism
@@ -78,7 +75,7 @@ class ZerothOrderWavelengthRanges():
 
         """
         # Class properties that are initialized upon construction
-        self.drizzledStampPath = drizzledStampPath
+        self.drizzledStampPath = None
         self.zerothOrderRegionFilePath = zerothOrderRegionFilePath
         self.sextractorCatalogueFilePath = sextractorCatalogueFilePath
 
@@ -89,6 +86,7 @@ class ZerothOrderWavelengthRanges():
         self.drizzleCoefficients = None
         self.drizzledStampBBoxCoordinates = None
         self.drizzledStampWavelengthParameters = None
+        self.rawZerothOrderRegions = None
         self.zerothOrderRegions = None
         self.zerothOrderRegionMask = None
         self.extractionModelMask = None
@@ -103,6 +101,13 @@ class ZerothOrderWavelengthRanges():
         self.regionMajorAxisPaddingFactor = regionMajorAxisPaddingFactor
         self.regionMinorAxisPaddingFactor = regionMinorAxisPaddingFactor
 
+        # region loading is time consuming so only perform this step once per field
+        self.loadRegions()
+        # the following need only occur once per field
+        self.parseSextractorCatalogue()
+
+        print('ZerothOrderWavelengthRanges constructor\n{}\n{}'.format(zerothOrderRegionFilePath,sextractorCatalogueFilePath))
+
     def loadRegions(self) :
         """
         Utility method uses the pyregion module (http://pyregion.readthedocs.io/en/latest/) to load
@@ -110,8 +115,8 @@ class ZerothOrderWavelengthRanges():
         images in the appropriate full, drizzled grism
         image.
         """
-        if self.zerothOrderRegions is None :
-            self.zerothOrderRegions = pyregion.open(self.zerothOrderRegionFilePath)
+        if self.rawZerothOrderRegions is None :
+            self.rawZerothOrderRegions = pyregion.open(self.zerothOrderRegionFilePath)
 
     def loadDrizzledStampScienceHeader(self) :
         """
@@ -246,6 +251,8 @@ class ZerothOrderWavelengthRanges():
 
         for region in zerothOrderRegionsCopy :
             # Extract the object ID for the zeroth order being processed from the region file annotation
+            if 'circle' not in region.name and 'ellipse' not in region.name :
+                continue
             zeroOrderId = int(region.attr[1]['text'].split()[0])
             # Attempt to extract the elliptical shape parameters for the object ID from the parsed sextractor catalogue
             zeroOrderImageData = self.sextractorCatalogue[self.sextractorCatalogue['NUMBER'] == zeroOrderId][['A_IMAGE','B_IMAGE','THETA_IMAGE']]
@@ -276,7 +283,7 @@ class ZerothOrderWavelengthRanges():
             self.loadDrizzledStampBBoxCoordinates()
 
         # operate on a copy of the parsed region data
-        zerothOrderRegionsCopy = copy.deepcopy(self.zerothOrderRegions)
+        zerothOrderRegionsCopy = copy.deepcopy(self.rawZerothOrderRegions)
 
         for region in zerothOrderRegionsCopy :
             # map the region coordinates from the full dispersed image into the stamp bounding box
@@ -309,8 +316,13 @@ class ZerothOrderWavelengthRanges():
         """
         Method which actually computes the ranges of wavelengths that intersect zeroth order image regions.
         """
+        # Ensure that the drizzled stamp file path has been specified
+        if self.drizzledStampPath is None :
+            raise RuntimeError('No drizzled stamp path has been specified.')
+        else :
+            print('Using drizzled stamp:', self.drizzledStampPath)
+
         # perform required loading and mapping of region coordinates
-        self.loadRegions()
         self.mapRegionsToStampCoordinates() # automatically loads BBox coordinates
         self.applyDrizzleCoefficients() # automatically loads drizzle coefficients
         self.applyRegionShapesFromCatalogue()
@@ -331,6 +343,8 @@ class ZerothOrderWavelengthRanges():
 
         # find pixels of model containing non-zero pixels
         modelMask = self.drizzledStampModelExtension > 0
+        print('regionMask.shape', regionMask.shape)
+        print('modelMask.shape', modelMask.shape)
 
         # find the x-pixel ranges where the region mask is true (irrespective of the model value)
         flatRegionMask = np.any(regionMask, axis=0)
@@ -401,7 +415,7 @@ class ZerothOrderWavelengthRanges():
     def getWavelengthZerothOrderFlags(self, wavelengths) :
         """
         Compute and return the zeroth order status flags for the elements of an array-like structure
-        of wavelength values specified in Anstroms.
+        of wavelength values specified in Anstroms in the context of the passed grism stamp file.
 
         The zeroth order status flag can assume one of the following values:
         0 -- If no zeroth order images fall within the stamp bounds at the specified wavelength.
@@ -411,6 +425,25 @@ class ZerothOrderWavelengthRanges():
         model extension at the specified wavelength.
         """
         return np.array([ self.getWavelengthZeroOrderFlag(wavelength) for wavelength in wavelengths ])
+
+    def setDrizzledStampFilePath(self, drizzledStampPath) :
+        """
+        Set the path for the drizzled, wavelength-calibrated grism stamp file
+        """
+        self.drizzledStampPath = drizzledStampPath
+        self.resetDrizzledStampParameters()
+
+    def resetDrizzledStampParameters(self) :
+        self.drizzledStampScienceHeader = None
+        self.drizzledStampModelExtension = None
+        self.drizzleCoefficients = None
+        self.drizzledStampBBoxCoordinates = None
+        self.drizzledStampWavelengthParameters = None
+        self.zerothOrderRegions = None
+        self.zerothOrderRegionMask = None
+        self.extractionModelMask = None
+        self.regionWavelengthRanges = None
+        self.regionInModelWavelengthRanges = None
 
     def plot(self) :
         """
