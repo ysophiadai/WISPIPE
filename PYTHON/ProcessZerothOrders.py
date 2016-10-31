@@ -6,6 +6,8 @@ if __name__ == "__main__" :
     import glob
     import re
     import argparse
+    import multiprocessing
+    #from multiprocessing import Pool
 
     parser = argparse.ArgumentParser(description='Add information about zeroth order contamination to .dat files.')
     parser.add_argument('--dryrun', action='store_const', const=True, dest='dryrun')
@@ -93,7 +95,11 @@ if __name__ == "__main__" :
         # instantiate the class to compute the wavelength ranges affected by zeroth order images
         zeroOrderRanges = ZerothOrderWavelengthRanges(regionFilePath, catalogueFilePath)
 
-        for stampFilePath in grismStampFitsFiles :
+        #pdb.set_trace()
+
+        # MR edit to replace for loop with a map to run it with multiple processors to speed things up. 
+        #for stampFilePath in grismStampFitsFiles :
+        def run_zeroOrderRanges(stampFilePath):
             # Now attempt to locate the corresponding .dat file in the "Spectra"
             # directory
             currentObject = None
@@ -112,35 +118,45 @@ if __name__ == "__main__" :
                 currentGrism, currentPar, datFilePath)
                 )
                 # No need to crash here, just skip to the next stampPath
-                continue
+                # MR modified this to if and else instead of continue since no longer a for loop. 
+            else:
 
-            if verbose :
-                print ('{0}: Working on .dat file "{1}"...'.format(sys.argv[0], datFilePath))
-
-            # Finally, the data to process the .dat file are assembled
-
-            # Parse the .dat file into a pandas dataframe
-            datFile = open(datFilePath)
-            columnNames = datFile.readline().split()[1:]
-            datFile.close()
-            datFileFrame = pd.read_csv(datFilePath, delim_whitespace=True, header=0, engine='c', names=columnNames, comment='#')
-
-            # set the stamp file to provide the context in which the presence of zeroth order images should be computed
-            zeroOrderRanges.setDrizzledStampFilePath(stampFilePath)
-            # update the dataframe column for the zeroth orders to reflect the computation
-            datFileFrame['zeroth'] = zeroOrderRanges.getWavelengthZerothOrderFlags(datFileFrame['wave'].values)
-
-            # generate some appropriately formatted output
-            datFileOutput = '{0}{1}\n'.format('#'.ljust((outputColumnWidth - 1) - len(columnNames[0])), datFileFrame.to_string(col_space=outputColumnWidth, index=False, header=True, justify='right', float_format=lambda x : "{:.6e}".format(x)))
-
-            # overwrite the input .dat file using the generated data
-            if not dryrun :
-                outFile = open(datFilePath, 'w')
-                outFile.write(datFileOutput)
-                outFile.close()
                 if verbose :
-                    print('Updated .dat file written to {0}'.format(datFilePath))
-            else :
-                print('Running in dryrun mode. No files were modified.')
-                if verbose :
-                    print('Generated ouput:\n{0}'.format(datFileOutput))
+                    print ('{0}: Working on .dat file "{1}"...'.format(sys.argv[0], datFilePath))
+
+                # Finally, the data to process the .dat file are assembled
+
+                # Parse the .dat file into a pandas dataframe
+                datFile = open(datFilePath)
+                columnNames = datFile.readline().split()[1:]
+                datFile.close()
+                datFileFrame = pd.read_csv(datFilePath, delim_whitespace=True, header=0, engine='c', names=columnNames, comment='#')
+                
+                # set the stamp file to provide the context in which the presence of zeroth order images should be computed
+                zeroOrderRanges.setDrizzledStampFilePath(stampFilePath)
+                # update the dataframe column for the zeroth orders to reflect the computation
+                datFileFrame['zeroth'] = zeroOrderRanges.getWavelengthZerothOrderFlags(datFileFrame['wave'].values)
+                
+                # generate some appropriately formatted output
+                datFileOutput = '{0}{1}\n'.format('#'.ljust((outputColumnWidth - 1) - len(columnNames[0])), datFileFrame.to_string(col_space=outputColumnWidth, index=False, header=True, justify='right', float_format=lambda x : "{:.6e}".format(x)))
+                
+                # overwrite the input .dat file using the generated data
+                if not dryrun :
+                    outFile = open(datFilePath, 'w')
+                    outFile.write(datFileOutput)
+                    outFile.close()
+                    if verbose :
+                        print('Updated .dat file written to {0}'.format(datFilePath))
+                else :
+                    print('Running in dryrun mode. No files were modified.')
+                    if verbose :
+                        print('Generated ouput:\n{0}'.format(datFileOutput))
+
+        # Macs report double number of real processors due to multi-threading, hence divide by 2. 
+        # I subtract one from this number so I can still have a responsive computer. 
+        numcpu = (multiprocessing.cpu_count() / 2) - 1
+        print('Using {0} processors'.format(numcpu))
+
+        # This is doing the multiprocessing for me. 
+        p = multiprocessing.Pool(numcpu)
+        results = p.map(run_zeroOrderRanges, grismStampFitsFiles)
