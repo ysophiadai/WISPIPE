@@ -152,9 +152,8 @@ if __name__ == "__main__" :
                     if verbose :
                         print('Generated ouput:\n{0}'.format(datFileOutput))
 
-        # Macs report double number of real processors due to multi-threading, hence divide by 2. 
-        # I subtract one from this number so I can still have a responsive computer. 
-        numcpu = (multiprocessing.cpu_count() / 2) - 1
+        # I subtract two from this number so I can still have a responsive computer. 
+        numcpu = multiprocessing.cpu_count() -2
         print('Using {0} processors'.format(numcpu))
 
         # This is doing the multiprocessing for me. 
