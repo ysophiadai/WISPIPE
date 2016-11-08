@@ -28,10 +28,22 @@ install astroconda in python
  
 >> conda create -n astroconda python=2.7 iraf pyraf stsci
 
-
 Then whenever you want it, type: source activate astroconda (in BASH only!!)
 
-Remember: Do not have both Ureka and astroconda active at the same
+How to install Eureka:
+
+Download this link:
+OS X < 10.12 (or linux)
+http://ssb.stsci.edu/ureka/1.5.2/install_ureka_1.5.2
+
+OS X >= 10.12
+http://ssb.stsci.edu/ureka/1.5.2/install_ureka_1.5.2_sierra
+
+Run the installer, e.g. sh install_ureka_1.5.2
+
+To activate Ureka, type: ur_setup
+
+**** Remember: Do not have both Ureka and astroconda active at the same
 time. You can do ur_forget or source deactivate astroconda to remove
 one or the other.
 
