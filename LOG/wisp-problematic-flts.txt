@@ -1,0 +1,166 @@
+
+badframes notes by SD and then updated by MR:
+
+Par3: shadows of stars exists in background
+Par8: persistence bkg in :
+	F110W   ib8cbqejq_flt.fits   OK
+	F110W   ib8cbresq_flt.fits   faint
+	F110W   ib8cbsezq_flt.fits   strong
+	F110W   ib8cbtf6q_flt.fits   strong
+Par11: F140W   ib8ccalzq_flt.fits   
+Par12:G102   ib8cateyq_flt.fits
+	  G141   ib8c6tdyq_flt.fits
+Par15: G141   ib8cc4zbq_flt.fits
+Par16: G102   ib8cagmjq_flt.fits
+Par18: G141   ib8cegccq_flt.fits
+Par27: G102   ib8ce4yzq_flt.fits
+Par48: F140W   ib8c7hnyq_flt.fits bad
+
+G141 only:
+Par23: G141   ib8cduqjq_flt.fits
+Par57:  F140W   ib8ccweuq_flt.fits  strong persistence
+		F140W   ib8ccygoq_flt.fits  strong persistence
+Par59: G141   ib8cczo5q_flt.fits satellite trial     
+Par75: G141   ibl96fhyq_flt.fits badstripes
+Par90: G141   ib8ccjh9q_flt.fits top bad stripes
+Par100: full of stars, useless
+Par102: blank field of high noise, image useless  
+Par109: F140W with satellite trial, BUT this is the only IR so keep
+Par112: G141   ibl96lrxq_flt.fits     
+Par117: faint stars all over the field 
+Par125: bright star in the center of field!
+Par126: G141   ibl92eerq_flt.fits     
+Par133: bright star in the center of field!
+Par142: G141   ibl91payq_flt.fits (stripe)
+Par145: G141   ibl97pptq_flt.fits (stripe)
+Par158: F160W   ibl95cqaq_flt.fits (satellite trial)
+Par178: G141   ibtt3gosq_flt.fits (bad stripes, but this is the only exposure so keep)
+Par184: strong persistence in all G141 fields
+Par185: bad exposures in all     
+Par193: black strip to the left of the G141 band
+Par197: black strip to the left of the G141 band
+Par198: black strip to the left of the G141 band
+
+202: G102   ibtt50g5q_flt.fits     
+207: G141   ibtt0lv0q_flt.fits (band across, but it is the only G141 so keep)
+208: bad exposures in all     
+223: bad exposures in all     
+232: G102   ibtt22fhq_flt.fits     
+236: G102   ibtt08n0q_flt.fits     
+250: F140W: ibtt54jyq.fits, persistence     
+253: bad exposures in all     
+
+254: bad exposures in all     
+255: bad exposures in all     
+258: 
+	F160W  ic3t2qk2q_flt.fits persistence     
+	F110W   ic3t2ngdq_flt.fits
+	F110W   ic3t2ohmq_flt.fits
+	F110W   ic3t2rkyq_flt.fits
+Par266: persistence in F140 (but keep, cause this is the only one)
+Par272: G102   ibtt0dshq_flt.fits
+Par274: bad sky (remove whole field)
+Par276: bad sky (remove whole field)
+Par278: bad persistence (remove whole field)
+Par280: bad sky (remove whole field)
+Par297: F110W   ic3t3mutq_flt.fits (noisier)
+Par298: 
+	F160W   ic3t81chq_flt.fits (noisy to the left)
+	F110W   ic3t79moq_flt.fits (noisier)
+	F110W   ic3t80c7q_flt.fits (CR)
+
+Par299: G102   ic3t30goq_flt.fits (spikes)
+
+344: F110W   icdye2axq_flt.fits (noisy)
+353: 
+	F110W   icdydwaqq_flt.fits (persistence)
+	F110W   icdydxazq_flt.fits (persistence)
+	F110W   icdydyb7q_flt.fits (persistence)
+383: bright star in north. 
+384: G141   icdye3a9q_flt.fits     
+
+304: 
+F110W   ic3t39hrq_flt.fits (noisy, CR)
+307: merging galaxies in the field?
+308: G141   ic3t3qurq_flt.fits 9 (strange bottom)
+311: F160W   ic3t0tbwq_flt.fits     
+315: F110W and F160W, persistence from grism images in a few images. Leaving as is for now
+316: high persistence in G102
+	G141   ic3t10zgq_flt.fits
+318: Busy field (remove, bad pixels)
+     G102   ic3t4ivcq_flt.fits
+319:F110W, persistence from grism images in a few images. Leaving as is for now
+320: G102   icdx7kkoq_flt.fits (noisy)
+     F160W  - icdx7hiuq_flt.fits, icdx7lovq_flt.fits, and icdx7kklq_flt.fits - persistence of a bright star from grism images 
+		Keeping it in since otherwise do not have enough. Could also have persistence in grism images???
+321: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now. 
+323: F814W   icdx82odq_flt.fits (CR)
+324: F160W   icdy5trcq_flt.fits     
+	Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
+325: F160W   icdx9otuq_flt.fits     
+326: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
+333: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
+339: 
+noisy stripes:
+G102   icdx10k7q_flt.fits
+G102   icdx46bzq_flt.fits
+G102   icdx7ebbq_flt.fits
+G141   icdx03w7q_flt.fits
+G141   icdx24evq_flt.fits
+G141   icdx6xzeq_flt.fits
+persistence:
+F110W   icdx06d9q_flt.fits
+F110W   icdx06daq_flt.fits
+F110W   icdx07eaq_flt.fits
+F110W   icdx07ebq_flt.fits
+F110W   icdx08elq_flt.fits
+F110W   icdx08emq_flt.fits
+F110W   icdx6yznq_flt.fits
+F110W   icdx6za1q_flt.fits
+F110W   icdx7aa9q_flt.fits
+F110W   icdx7aaaq_flt.fits
+F110W   icdx7bagq_flt.fits
+F110W   icdx7eb7q_flt.fits
+F110W   icdx7eb8q_flt.fits
+F160W   icdx24etq_flt.fits
+F160W   icdx24euq_flt.fits
+F160W   icdx6xzaq_flt.fits
+
+347: F110W: icdx8cgfq_flt.fits & icdx8cggq_flt.fits have lines in them across image.
+     G102 icdx8bg2q_flt.fits & icdx8cgjq_flt.fits have lines in them across image. A few other have fainter lines (which I'm leaving)
+Par348: G102   icdxd0uxq_flt.fits
+	 F110W, persistence from grism images in many images. Leaving as is for now
+Par349: F160W and F110W, persistence from grism images in many images. Leaving as is for now
+Par351: 
+G102   icdx6jmcq_flt.fits
+G141   icdx6ixkq_flt.fits
+F606W   icdx6lmvq_flt.fits
+? G141   icdx6gx0q_flt.fits  ? (stripe still needs to remove)
+
+
+356: F814W   icdxarwxq_flt.fits
+357: F110W icdx8nydq_flt.fits
+	F160W, persistence from grism images in many images. Leaving as is for now
+368: G102   icdxbogoq_flt.fits
+
+374: 
+G141   icdx1dztq_flt.fits
+F110W   icdx0xykq_flt.fits
+
+377: 
+G102   icdxc0hbq_flt.fits
+G102   icdxc2icq_flt.fits
+
+379:
+G102   icdxb7bzq_flt.fits
+G102   icdxb8cdq_flt.fits
+G102   icdxb9crq_flt.fits
+G102   icdxbad5q_flt.fits
+
+380: 
+G141   icdxbfonq_flt.fits
+
+385:
+G102   icdxd3l2q_flt.fits
+G102   icdxd5liq_flt.fits
+G102   icdxd6lqq_flt.fits
