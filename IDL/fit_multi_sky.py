@@ -215,8 +215,12 @@ class Grism():
         ##-->
         # the catalogs contain entries from running sextractor on each
         # image extension. Use only those from the SCI extension
-        w = np.where(cat[:,0] == 1)
-        nobj = w[0][1]
+        # MR Oct 2016 changed this to only run sextractor on the SCI extension
+        # So had to change this code as well.
+        #w = np.where(cat[:,0] == 1)
+        #pdb.set_trace()
+        #nobj = w[0][1]
+        nobj = cat.shape[0]
         #for i in range(cat[:,0].shape[0]):
         for i in range(nobj):
         ##<--
