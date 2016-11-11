@@ -81,13 +81,13 @@ for i = 0, n_elements(f110_list)-1 do begin
     if exptime1 gt 1041 then det='1.9'
     if exptime1 le 1041 then det='2.3'
     spawn,'sex '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits'+$
+          'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+          'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits[1]'+$
           ' -parameters_name '+path+$
           'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
           ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
           'SEX/'+strmid(f110_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
+          ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
    spawn,'cp '+path+'SEX/'+f110_list[i]+'.coo '+path+'DATA/DIRECT/'
 endfor
 
@@ -97,13 +97,13 @@ for i = 0, n_elements(f160_list)-1 do begin
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.3'
     spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f160_list[i]+'.coo -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits'+$
+          'SEX/'+f160_list[i]+'.coo -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+          'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits[1]'+$
           ' -parameters_name '+path+$
           'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
           ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
           'SEX/'+strmid(f160_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 16 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
+          ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
     spawn,'cp '+path+'SEX/'+f160_list[i]+'.coo '+path+'DATA/DIRECT/'
 endfor
 endif else begin
@@ -112,13 +112,13 @@ endif else begin
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.0'
     spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits'+$
+          'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+          'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits[1]'+$
           ' -parameters_name '+path+$
           'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
           ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
           'SEX/'+strmid(f140_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
+          ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
     spawn,'cp '+path+'SEX/'+f140_list[i]+'.coo '+path+'DATA/DIRECT/'
    endfor
 endelse
@@ -138,7 +138,7 @@ if exptime1 gt 1041 then det='1.9'
           'DATA/DIRECT/F110W_orig_wht.fits,'+path+'DATA/DIRECT/F110W_orig_rms.fits -parameters_name '+path+$
           'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
           ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F110_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
+          ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
    spawn,'cp '+path+'SEX/F110.cat '+path+'DATA/DIRECT/'
 endif
 
@@ -147,7 +147,7 @@ if f160_list0[0] ne 'none' then begin
    h2=headfits(path+'DATA/DIRECT/F160W_orig_drz.fits') 
    exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
    det='2.3'
-   spawn,'sex '+path+'DATA/DIRECT/F160W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F160.cat -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F160W_orig_wht.fits,'+path+'DATA/DIRECT/F160W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F160_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw'
+   spawn,'sex '+path+'DATA/DIRECT/F160W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F160.cat -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F160W_orig_wht.fits,'+path+'DATA/DIRECT/F160W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F160_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
    spawn,'cp '+path+'SEX/F160.cat '+path+'DATA/DIRECT/'
 endif else begin
 ;F140W
@@ -155,7 +155,7 @@ endif else begin
    h2=headfits(path+'DATA/DIRECT/F140W_orig_drz.fits') 
    exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
    det='2.0'
-   spawn,'sex '+path+'DATA/DIRECT/F140W_orig_sci.fits'+' -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F140.cat -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F140W_orig_wht.fits,'+path+'DATA/DIRECT/F140W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F140_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw'
+   spawn,'sex '+path+'DATA/DIRECT/F140W_orig_sci.fits'+' -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F140.cat -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F140W_orig_wht.fits,'+path+'DATA/DIRECT/F140W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F140_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
    spawn,'cp '+path+'SEX/F140.cat '+path+'DATA/DIRECT/'
    endfor
 endelse
