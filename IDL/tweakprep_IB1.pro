@@ -69,12 +69,12 @@ for i = 0, n_elements(f110_list)-1 do begin
     exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
     if exptime1 gt 1041 then det='1.9'
     if exptime1 le 1041 then det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/'+f110_list[i]+'[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-    'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83  -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'.fits -parameters_name '+path+$
+    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
+    'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83  -WEIGHT_TYPE MAP_RMS -weight_image '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'.fits[1] -parameters_name '+path+$
     'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
     ' -ANALYSIS_THRESH 2.0 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+' -STARNNW_NAME '+path+$
-    'SEX/default.nnw -CHECKIMAGE_NAME '+path+'SEX/'+strmid(f110_list[i],0,19)+'_seg.fits'
-   spawn,'cp '+path+'SEX/'+f110_list[i]+'.coo '+path+'DATA/DIRECT/'
+    'SEX/default.nnw -CHECKIMAGE_NAME '+path+'SEX/'+strmid(f110_list[i],0,19)+'_seg.fits',/sh  
+     spawn,'cp '+path+'SEX/'+f110_list[i]+'.coo '+path+'DATA/DIRECT/'
 endfor
 
 if f160_list[0] ne 'none' then begin
@@ -93,10 +93,10 @@ if f160_list[0] ne 'none' then begin
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.3'
     spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-      'SEX/'+f160_list[i]+'.coo  -mag_zeropoint 25.96  -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits -parameters_name '+path+$
+      'SEX/'+f160_list[i]+'.coo  -mag_zeropoint 25.96  -WEIGHT_TYPE MAP_RMS -weight_image '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'.fits[1] -parameters_name '+path+$
       'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
       ' -ANALYSIS_THRESH 2.0 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+$
-      'SEX/default.nnw -CHECKIMAGE_NAME '+path+'SEX/'+strmid(f160_list[i],0,19)+'_seg.fits'
+      'SEX/default.nnw -CHECKIMAGE_NAME '+path+'SEX/'+strmid(f160_list[i],0,19)+'_seg.fits',/sh  
     spawn,'cp '+path+'SEX/'+f160_list[i]+'.coo '+path+'DATA/DIRECT/'
   endfor
 endif else begin
@@ -114,11 +114,11 @@ endif else begin
     exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
     det='2.0'
    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits'+'[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-         'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits'+$
+         'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_RMS -weight_image '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'.fits[1]'+$
          ' -parameters_name '+path+$
          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
          ' -ANALYSIS_THRESH 2 -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+$
-         'SEX/default.nnw -CHECKIMAGE_NAME  '+path+'SEX/'+strmid(f140_list[i],0,19)+'_seg.fits'
+         'SEX/default.nnw -CHECKIMAGE_NAME  '+path+'SEX/'+strmid(f140_list[i],0,19)+'_seg.fits',/sh  
    spawn,'cp '+path+'SEX/'+f140_list[i]+'.coo '+path+'DATA/DIRECT/'
    endfor
 endelse
@@ -154,7 +154,7 @@ openw,6,path+'DATA/DIRECT/'+'tweakprep.py'
 ;   printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="'+f110_list[0]+'",refcat="'+f110_list[0]+'.coo",updatehdr=False,updatewcs=False, xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=2.0, sigma=3.0, nclip=3, shiftfile=True,outshifts="shift_pos_flt.txt")'
 
 ;apply the pos-shift in the header
-   printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="'+f110_list[0]+'",refcat="'+f110_list[0]+'.coo",updatehdr=True, wcsname="shift0",updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_flt_final.txt",fitgeometry="shift")'
+   printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="'+f110_list[0]+'",refcat="'+f110_list[0]+'.coo",updatehdr=True, wcsname="shift0",updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_flt_final.txt",fitgeometry="shift",interactive=False)'
 
                                 ; --------------- this step is for CR
                                 ; removal to generate the
