@@ -472,7 +472,13 @@ def clean_par(skypath, verbose=True):
         imlist = 'DATA/DIRECT/%s_clean.list'%filt
         if os.stat(imlist).st_size != 0:
             d = np.genfromtxt(imlist, dtype='S100')
-            if d[0] != 'none':
+            print d.size,d,imlist
+            if d.size != 0:
+             if d.size==1:
+              AA=d
+             if d.size>1:
+              AA=d[0]
+             if AA != 'none':
                 filtlist = np.append(filtlist, d)
         directlist[filt] = filtlist
 
