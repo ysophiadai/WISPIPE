@@ -103,7 +103,7 @@ print, "======================="
 print, "im_clean (im_clean_IB6)"
 print, "======================="
 
-BPM='~/WISPIPE/aXe/CONFIG/bp_mask_v5.fits'
+
 
 configpath = pathc+'/aXe/CONFIG/'
 path = path0+'/aXe/'
