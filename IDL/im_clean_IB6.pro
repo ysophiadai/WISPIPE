@@ -103,6 +103,8 @@ print, "======================="
 print, "im_clean (im_clean_IB6)"
 print, "======================="
 
+BPM='~/WISPIPE/aXe/CONFIG/bp_mask_v5.fits'
+
 configpath = pathc+'/aXe/CONFIG/'
 path = path0+'/aXe/'
 path_data = path0+'/data/'+field+"/"
@@ -114,6 +116,9 @@ path3=path2+'DATA/DIRECT_GRISM/'
 path4=path2+'DATA/DIRECT/'
 path5=path2+'DATA/GRISM/'
 path6=path2+'DATA/UVIS/'
+
+BPM=configpath+'bp_mask_v6.fits'
+
 
   spawn, 'ls -1 '+path5+'i*flt.fits',grism_list
   grism_len=n_elements(grism_list)
@@ -154,7 +159,7 @@ if keyword_set(script) then goto, script
          dq=path5+foo2+'.fits'         ;dq is the *_flt.fits file to be cleaned
  
 
-            s_grism=badpix(name,1,dq)                   ;creates a *_flt_clean.fits from _flt.fits input, with 1 
+          s_grism=badpix(name,1,dq,BPM)                   ;creates a *_flt_clean.fits from _flt.fits input, with 1 
           tmp=readfits(name,hdr1,EXTEN_NO=1) 
          check_fits,s_grism,hdr1,/update
          modfits,name,s_grism,hdr1,EXTEN_NO = 1         ;replace the ***_flt_clean.fits with the bad pixel removed one
