@@ -95,33 +95,33 @@ end
 
 ;===========================================     MAIN  ====================================================
 
-pro im_clean_IB6,field,both=both,uvis=uvis,multidrizzle=multidrizzle,F140only=F140only, path0, pathc,script=script,single=single
+;pro im_clean_IB6,field,both=both,uvis=uvis,multidrizzle=multidrizzle,F140only=F140only, path0, pathc,script=script,single=single
+pro im_clean_IB6,field, path0, pathc,script=script
 
-;configpath ='/Users/ydai/WISPIPE/aXe/CONFIG/'  ; This is where the CONFIG folder is
-;path="~/data2/WISPS/aXe/" ; This is where data will end up
-;path_data='~/data2/WISPS/data/'+field+"/" ; this is where raw data are
 
-;;;;configpath = path0+'/aXe/CONFIG/'
-configpath = expand_path(pathc+'/aXe/CONFIG')+'/'
-path = expand_path(path0)+'/aXe/'
-path_data = expand_path(path0)+'/data/'+field+"/"
+print, "======================="
+print, "im_clean (im_clean_IB6)"
+print, "======================="
 
-;path="/Users/atek/Caltech/aXe/"
-;path_data='/Volumes/data/'+field+"/"
+configpath = pathc+'/aXe/CONFIG/'
+path = path0+'/aXe/'
+path_data = path0+'/data/'+field+"/"
+
 path2=path+field+"/"
 path3=path2+'DATA/DIRECT_GRISM/'
 ; MODIFICATION BY I.B. The program will work on files in "DIRECT" and
 ;"GRISM" and not DIRECT_GRISM anymore.
 path4=path2+'DATA/DIRECT/'
 path5=path2+'DATA/GRISM/'
+path6=path2+'DATA/UVIS/'
 
-  spawn, 'ls -1 '+path2+'DATA/GRISM/i*flt.fits',grism_list
+  spawn, 'ls -1 '+path5+'i*flt.fits',grism_list
   grism_len=n_elements(grism_list)
   print,grism_list
 
-  spawn, 'ls -1 '+path2+'DATA/DIRECT/i*flt.fits',direct_list
+  spawn, 'ls -1 '+path4+'i*flt.fits',direct_list
   direct_len=n_elements(direct_list)
-  spawn, 'ls -1 '+path2+'DATA/GRISM/i*flt_clean.fits',clean_list
+  spawn, 'ls -1 '+path5+'i*flt_clean.fits',clean_list
 
 
 
@@ -136,38 +136,26 @@ if keyword_set(script) then goto, script
 
          name=clean_list(j)                            ;***_flt_clean.fits
 ;        get parameters for drizzle
-            tmp=mrdfits(name,1,header)
-            rot=sxpar(header,'ORIENTAT')
-            ra=sxpar(header,'CRVAL1')
-            dec=sxpar(header,'CRVAL2')
-            print,"rotation parameter ....",rot
-            print,"center RA ....",ra
-            print,"center DEC ....",dec
-
-         ;tmp=strsplit(name,'.',/extract)
-         ;tmp2=strsplit(tmp[0],'/',/extract)
-         ;tmp3=strsplit(tmp2[8],'_',/extract)
-         ;dq=path2+'DATA/GRISM/'+tmp3[0]+'_'+tmp3[1]+'.fits' 
-         ;s_name=path2+'DATA/GRISM/m_sci_'+tmp2[8]+'.fits'   
-
-            name = strtrim(name, 2)
-            foob = strpos(name, '/', /reverse_search)   ;find position of '/'
-            fooe = strpos(name, '.', /reverse_search)   ;find position of '.'
-            fooe2 = strpos(name, '_', /reverse_search)  ;find position of the last'_'
-            foo2 = strmid(name, foob+1,fooe2-foob-1)    ;foo2 is the name right after '/' before '_***.fits'
-            foo3 = strmid(name, foob+1,fooe-foob-1)     ;foo3 is the name right after '/' before '.fits'
-;            s_name=path2+'DATA/GRISM/m_sci_'+foo3+'.fits'  
-            dq=path2+'DATA/GRISM/'+foo2+'.fits'         ;dq is the *_flt.fits file to be cleaned
+         tmp=mrdfits(name,1,header)
+         rot=sxpar(header,'ORIENTAT')
+         ra=sxpar(header,'CRVAL1')
+         dec=sxpar(header,'CRVAL2')
+         print,"rotation parameter ....",rot
+         print,"center RA ....",ra
+         print,"center DEC ....",dec
+   
+         name = strtrim(name, 2)
+         foob = strpos(name, '/', /reverse_search)   ;find position of '/'
+         fooe = strpos(name, '.', /reverse_search)   ;find position of '.'
+         fooe2 = strpos(name, '_', /reverse_search)  ;find position of the last'_'
+         foo2 = strmid(name, foob+1,fooe2-foob-1)    ;foo2 is the name right after '/' before '_***.fits'
+         foo3 = strmid(name, foob+1,fooe-foob-1)     ;foo3 is the name right after '/' before '.fits'
+;         s_name=path2+'DATA/GRISM/m_sci_'+foo3+'.fits'  
+         dq=path5+foo2+'.fits'         ;dq is the *_flt.fits file to be cleaned
  
 
-;&&&&&&&&&&&&&&&&&&&&&&&  MODIFIED %%%%%%%%%%%%%%%
-;;     s_grism=badpix(s_name,0,dq)
             s_grism=badpix(name,1,dq)                   ;creates a *_flt_clean.fits from _flt.fits input, with 1 
-
           tmp=readfits(name,hdr1,EXTEN_NO=1) 
-;;        sxaddpar,hdr1,'BITPIX',-16
-
-;&&&&&&&&&&&&&&&&&&&&&&&  MODIFIED %%%%%%%%%%%%%%%
          check_fits,s_grism,hdr1,/update
          modfits,name,s_grism,hdr1,EXTEN_NO = 1         ;replace the ***_flt_clean.fits with the bad pixel removed one
      endfor
@@ -175,63 +163,146 @@ if keyword_set(script) then goto, script
 
 ; clean direct images
 ;*******************************************************
-      print,"Sigma-rejection cleaning of direct images ....."
-      clean_direct,direct_list                           ;all files in /DATA/DIRECT folder
-      
-; MODIFIED BY I.B. : direct and grism exposures are not copyied to the
-; DIRECT_GRISM folder at this point (to prevent possible bugs) 
-;      spawn, 'cp '+path2+'DATA/GRISM/i*clean.fits '+path3    
-;       print,"Copying =====================================================",path2+'DATA/GRISM/*clean.fits TO '+path3 
-;       spawn, 'cp '+path2+'DATA/DIRECT/*clean.fits '+path3
-;       print,"Copying =====================================================",path2+'DATA/DIRECT/*clean.fits TO '+path3 
-   
+     print,"Sigma-rejection cleaning of direct images ....."
+     clean_direct,direct_list   ;all files in /DATA/DIRECT folder
+
+
 script:
 
 ;goto,eend
-if not keyword_set(multidrizzle) then begin
+
+   
 ; create the default astrodrizzle script
+;***********************************
 ;***********************************
 openw,10,path3+'driz.py'
 openw,11,path2+'DATA/UVIS/uvis_driz.py'
 openw,12,path2+'DATA/UVIS/uvis_initial_driz.py'
 openw,13,path2+'DATA/UVIS/uvis_updatewcs.py'
 openw,14,path2+'IR_updatewcs.py'
+;***********************************
+;***********************************
 
 
 
-   printf,10,'import os,string,time'
-   printf,10,'import sys'
-   printf,10,'import shutil'
-   printf,10,'from pyraf import iraf'
-   printf,10,'from iraf import stsdas, slitless, axe, dither'
-   printf,10,'import drizzlepac'
-   printf,10,'from drizzlepac import astrodrizzle'
-   printf,10,'from pyraf.irafpar import IrafParS'
-   printf,10,'from stsci.tools import teal'
-   printf,10, 'teal.unlearn("astrodrizzle")'
+printf,10,'import os,string,time'
+printf,10,'import sys'
+printf,10,'import shutil'
+printf,10,'from pyraf import iraf'
+printf,10,'from iraf import stsdas, slitless, axe, dither'
+printf,10,'import drizzlepac'
+printf,10,'from drizzlepac import astrodrizzle'
+printf,10,'from pyraf.irafpar import IrafParS'
+printf,10,'from stsci.tools import teal'
+printf,10, 'teal.unlearn("astrodrizzle")'
 
-   ;printf,10,'unlearn astrodrizzle'
+    ;printf,10,'unlearn astrodrizzle'
 
-   readcol,path3+'F110_clean.list',f110_list,format=('A')
-   readcol,path3+'F140_clean.list',f140_list,format=('A')
-   readcol,path3+'F160_clean.list',f160_list,format=('A')
-   readcol,path3+'G102_clean.list',g102_list,format=('A')
-   readcol,path3+'G141_clean.list',g141_list,format=('A')
-   numG141 = n_elements(G141_list)
+TEST_J=file_test(path4+'F110_clean.list',/zero_length)    ; 1 if exists but no content
+TEST_JB=file_test(path4+'F110_clean.list')                ; 1 if exists
+TEST_H1=file_test(path4+'F140_clean.list',/zero_length)   ; 1 if exists but no content
+TEST_H1B=file_test(path4+'F140_clean.list')               ; 1 if exists but
+TEST_H2=file_test(path4+'F160_clean.list',/zero_length)   ; 1 if exists but no content
+TEST_H2B=file_test(path4+'F160_clean.list')               ; 1 if exists
+TEST_G102=file_test(path5+'G102_clean.list',/zero_length) ; 1 if exists but no content
+TEST_G102B=file_test(path5+'G102_clean.list')             ; 1 if exists
+TEST_G141=file_test(path5+'G141_clean.list',/zero_length) ; 1 if exists but no content
+TEST_G141B=file_test(path5+'G141_clean.list')             ; 1 if exists
+; UVIS
+TEST_UV1=file_test(path6+'UVIS1.list',/zero_length) ; 1 if exists but no content
+TEST_UV1B=file_test(path6+'UVIS1.list')             ; 1 if exists
+TEST_UV2=file_test(path6+'UVIS2.list',/zero_length) ; 1 if exists but no content
+TEST_UV2B=file_test(path6+'UVIS2.list')             ; 1 if exists
 
+
+f110_list='none'
+f140_list='none'
+f160_list='none'
+g102_list='none'
+g141_list='none'
+UV1_list ='none'
+UV2_list ='none'
+
+; IF FILES EXIST AND ARE NOT VOID ...
+;                                 ... READ THEM!
+IF TEST_J eq 0 and TEST_JB eq 1 THEN       readcol,path4+'F110_clean.list',f110_list,format=('A')
+IF TEST_H1 eq 0 and TEST_H1B eq 1 THEN     readcol,path4+'F140_clean.list',f140_list,format=('A')
+IF TEST_H2 eq 0 and TEST_H2B eq 1 THEN     readcol,path4+'F160_clean.list',f160_list,format=('A')
+IF TEST_G102 eq 0 and TEST_G102B eq 1 THEN readcol,path5+'G102_clean.list',g102_list,format=('A')
+IF TEST_G141 eq 0 and TEST_G141B eq 1 THEN readcol,path5+'G141_clean.list',g141_list,format=('A')
+; UVIS
+IF TEST_UV1 eq 0 and TEST_UV1B eq 1 THEN readcol,path6+'UVIS1.list',UV1_list,format=('A')
+IF TEST_UV2 eq 0 and TEST_UV2B eq 1 THEN readcol,path6+'UVIS2.list',UV2_list,format=('A')
+
+num110 = n_elements(f110_list)
+num140 = n_elements(f140_list)
+num160 = n_elements(f160_list)
+numG102 = n_elements(G102_list)
+numG141 = n_elements(G141_list)
+; UVIS
+numUV1 = n_elements(UV1_list)
+numUV2 = n_elements(UV2_list)
+
+; IF n_elements(f110_list) eq 0 or strlowcase(f110_list[0]) eq 'none' then f110_list='none'
+; IF n_elements(f140_list) eq 0 or strlowcase(f110_list[0]) eq 'none' then f140_list='none'
+; IF n_elements(f160_list) eq 0 or strlowcase(f110_list[0]) eq 'none' then f160_list='none'
+; IF n_elements(g102_list) eq 0 or strlowcase(f110_list[0]) eq 'none' then g102_list='none'
+; IF n_elements(g141_list) eq 0 or strlowcase(f110_list[0]) eq 'none' then g141_list='none'
+;  ; UVIS
+; IF n_elements(UV1_list) eq 0 or strlowcase(UV1_list[0]) eq 'none' then UV1_list='none'
+; IF n_elements(UV2_list) eq 0 or strlowcase(UV2_list[0]) eq 'none' then UV2_list='none'
+
+
+IF strlowcase(f110_list[0]) eq 'none' then num110  =0
+IF strlowcase(f140_list[0]) eq 'none' then num140  =0
+IF strlowcase(f160_list[0]) eq 'none' then num160  =0
+IF strlowcase(g102_list[0]) eq 'none' then numG102 =0
+IF strlowcase(g141_list[0]) eq 'none' then numG141 =0
+; UVIS
+IF strlowcase(UV1_list[0]) eq 'none' then numUV1 =0
+IF strlowcase(UV2_list[0]) eq 'none' then numUV2 =0
+
+; ==================================================================
+; KIND OF DATA TO BE MANAGED
+; ==================================================================
+H_only='NO'
+both='NO'
+uvis='NO'
+;-------------------------------------------------------------------
+; ONLY F140(or160) but both grisms
+IF num110 eq 0 and numG102 gt 0 and numG141 gt 0 then H_only='YES'
+; ONLY g141 grism (NO g102, but maybe both filters F110 and F160)
+IF numG102 gt 0 and numG141 gt 0 then both="YES" 
+; UVIS DATA
+IF numUV1 gt 0 and numUV2 gt 0 then uvis='YES' ; never in previous two cases.
+
+print, '=========================================================='
+print, "Set of data:"
+print, "H_only "+H_only
+print, "both   "+both
+print, "uvis   "+uvis
+print, '------------------------------'
+print, "H_only --> only F140 or F160 but both grisms."
+print, "both   --> both G102 and G141 observations are present"
+print, "uvis   --> uvis data are present"
+print, '=========================================================='
+
+
+; ==================================================================
+; ==================================================================
 
 ;ooooooooooooooooooo   14   oooooooooooooooooooooo
-  printf,14,'import os,string,time'
-  printf,14,'import sys'
-  printf,14,'import shutil'
-  printf,14,'from pyraf import iraf'
-  printf,14,'from iraf import stsdas, slitless, axe, dither'
-  printf,14,'import drizzlepac'
-  printf,14,'from drizzlepac import astrodrizzle'
-  printf,14,'from pyraf.irafpar import IrafParS'
-  printf,14,'from stsci.tools import teal'
-  printf,14,'from stwcs import updatewcs'
-  printf,14, 'teal.unlearn("astrodrizzle")'
+printf,14,'import os,string,time'
+printf,14,'import sys'
+printf,14,'import shutil'
+printf,14,'from pyraf import iraf'
+printf,14,'from iraf import stsdas, slitless, axe, dither'
+printf,14,'import drizzlepac'
+printf,14,'from drizzlepac import astrodrizzle'
+printf,14,'from pyraf.irafpar import IrafParS'
+printf,14,'from stsci.tools import teal'
+printf,14,'from stwcs import updatewcs'
+printf,14, 'teal.unlearn("astrodrizzle")'
 ;ooooooooooooooooooo   14   oooooooooooooooooooooo
 printf,14, 'import os'
 printf,14, 'os.chdir("DATA/DIRECT/")'
@@ -247,388 +318,249 @@ if g141_list[0] ne 'none' and g141_list[0] ne '' then printf,14, 'updatewcs.upda
 
 
 
-       if f160_list[0] ne 'none' then begin
-; h=headfits(path4+strmid(f160_list[0],0,13)+'.fits') ;I.B. modified 2016
-          h=headfits(path4+strmid(f160_list[0],0,13)+'.fits') 
-          ra=strcompress(sxpar(h,'RA_TARG'),/remove_all)
-          dec=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
-       endif 
-
 ;=========if F160 image exist, use F160 in driz.py; else use F140 images=========
-   if f160_list[0] ne 'none' then begin
-      num = n_elements(f160_list)
-;=========this step fixes the bad pixels by the mask; 1000 times along
-;goto,no direct drizzle, cause already done in tweakreg.py
-      print, "++++++++++"
-      print, keyword_set(single)
-      print, "++++++++++"
-if not keyword_set(single) then  goto,nodirectdrz160
-;the line interpolation
-       printf,10,'                '
-;       printf,10,'iraf.fixpix(images="@F160_clean.list'+'//[1]%''",masks="'+configpath+$
-;              'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'
-       printf,10,'iraf.fixpix(images="@F160_clean.list'+'//[1]%''",masks="'+configpath+$
-              'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
-;=========depending on the number of G141 grism images, generate the G141_drz.fits
-       if numG141 gt 1 then begin
-         ;printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' 
-          printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' 
-       endif else begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)' 
-          printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)' 
-       endelse
-;=========depending on the number of F160 direct images, generate F160W_drz.fits
-       if num gt 1 then begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' ;
-          printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' ;
-       endif else begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-          printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-       endelse
-;=========from the drizzled image, generate *_sci.fits; *_wht.fits;
-;and correlated noise corrected *_rms.fits
-       printf,10,'iraf.imcopy(input="F160W_drz.fits[1]", output="F160W_sci.fits")'
-       printf,10,'iraf.imcopy(input="F160W_drz.fits[2]", output="F160W_wht.fits")'
-       ;;; printf,10,'iraf.imcalc(input="F160W_wht.fits", output="F160W_rms.fits", equals="1.66354/sqrt(im1)")'
-       printf,10,'iraf.imcalc(input="F160W_wht.fits", output="F160W_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-       nodirectdrz160:
-;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
-    if keyword_set(uvis) then begin 
-       printf,10,'                '
-       if num gt 1 then begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-          printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-       endif else begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-       printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-       endelse
-       
-            printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F160W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F160W_UVIS_sci.fits")'
-            printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F160W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F160W_UVIS_wht.fits")'
-            ;;; printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F160W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F160W_UVIS_rms.fits", equals="2.8236/sqrt(im1)")'
-            printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F160W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F160W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-       if num gt 1 then begin
-            ;printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-            printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-         endif else begin
-           ; printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-         printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-         endelse
-         printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F160W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F160W_IR_sci.fits")'
-         printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F160W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F160W_IR_wht.fits")'
-         ;;; printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F160W_IR_wht.fits", output="../UVIS/UVIStoIR/F160W_IR_rms.fits", equals="1.66354/sqrt(im1)")'
-         printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F160W_IR_wht.fits", output="../UVIS/UVIStoIR/F160W_IR_rms.fits", equals="1.0/sqrt(im1)")'; NEW solution (Suggeste by Marc)
-         endif
-;========= removed north-up option =========
-; depending on the number of F160 direct images, generate
-; F160W_rot_drz.fits; note final_wcs=True,final_rot=0 are removed
-;       if num gt 1 then begin
-;          printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_northup",num_cores=5,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)'
-;       endif else begin
-;          printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_northup",num_cores=5,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-;       endelse
-;       printf,10,'iraf.imcopy(input="F160W_northup_drz.fits[1]", output="F160W_northup_sci.fits")'
-;       printf,10,'iraf.imcopy(input="F160W_northup_drz.fits[2]", output="F160W_northup_wht.fits")'
-;       printf,10,'iraf.imcalc(input="F160W_northup_wht.fits", output="F160W_northup_rms.fits", equals="1.66354/sqrt(im1)")'
-    endif else begin 
+if f160_list[0] ne 'none' then begin
+   
+ ; ------------------------------------------------------------
+ h=headfits(path4+strmid(f160_list[0],0,13)+'.fits') 
+ ra=strcompress(sxpar(h,'RA_TARG'),/remove_all)
+ dec=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
+ ; ------------------------------------------------------------
 
-;=========if F160 image does not exist, use F140 as default in driz.py
-       readcol,path4+'F140_clean.list',f140_list,format=('A')
-       num = n_elements(f140_list)
-       if f140_list[0] ne 'none' then begin
-; h=headfits(path3+strmid(f140_list[0],0,13)+'.fits')  ;I.B. modified 2016
-          h=headfits(path4+strmid(f140_list[0],0,13)+'.fits') 
-          ra=strcompress(sxpar(h,'RA_TARG'),/remove_all)
-          dec=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
-       endif
-if not keyword_set(single) then       goto,nodirectdrz140
-       printf,10,'                '
-    ;   printf,10,'iraf.fixpix(images="@F140_clean.list'+'//[1]%''",masks="'+configpath+$
-    ;          'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'
-       printf,10,'iraf.fixpix(images="@F140_clean.list'+'//[1]%''",masks="'+configpath+$
-              'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
-       if numG141 gt 1 then begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-          printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-       endif else begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-          printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-       endelse
-       if num gt 1 then begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' 
-          printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' 
-       endif else begin
-          ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-          printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-       endelse
-       printf,10,'iraf.imcopy(input="F140W_drz.fits[1]", output="F140W_sci.fits")'
-       printf,10,'iraf.imcopy(input="F140W_drz.fits[2]", output="F140W_wht.fits")'
-       ;;; printf,10,'iraf.imcalc(input="F140W_wht.fits", output="F140W_rms.fits", equals="1.66354/sqrt(im1)")'
-       printf,10,'iraf.imcalc(input="F140W_wht.fits", output="F140W_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-       nodirectdrz140:
-;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
-    if keyword_set(uvis) then begin 
-           printf,10,'                '
-           if num gt 1 then begin
-              ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-              printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-       endif else begin
-              ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-              printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-           endelse
-            printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F140W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F140W_UVIS_sci.fits")'
-            printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F140W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F140W_UVIS_wht.fits")'
-            ;;; printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F140W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F140W_UVIS_rms.fits", equals="2.8236/sqrt(im1)")'
-            printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F140W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F140W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-            if num gt 1 then begin
-              ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-              printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-       endif else begin
-              ;printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-              printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-            endelse
-       printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F140W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F140W_IR_sci.fits")'
-            printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F140W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F140W_IR_wht.fits")'
-            ;;; printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F140W_IR_wht.fits", output="../UVIS/UVIStoIR/F140W_IR_rms.fits", equals="1.66354/sqrt(im1)")'
-            printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F140W_IR_wht.fits", output="../UVIS/UVIStoIR/F140W_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-         endif
-;========= remove north-up option =========
-;       if numG141 gt 1 then begin
-;       if num gt 1 then begin
-;          printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_northup",num_cores=5,final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-;       endif else begin
-;          printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_northup",num_cores=5,final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'
-;       endelse
-;       printf,10,'iraf.imcopy(input="F140W_northup_drz.fits[1]", output="F160W_northup_sci.fits")'
-;       printf,10,'iraf.imcopy(input="F140W_northup_drz.fits[2]", output="F160W_northup_wht.fits")'
-;       printf,10,'iraf.imcalc(input="F140W_northup_wht.fits", output="F160W_northup_rms.fits", equals="1.66354/sqrt(im1)")'
-    endelse
+ ;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
+ if uvis eq 'YES' then begin
+         
+  printf,10,'                '
+  if num160 gt 1 then begin
+     printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+     printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+  endif else begin
+   IF num160 gt 0 THEN BEGIN
+    printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/IRtoUVIS/F160W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+    printf,10,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="../UVIS/UVIStoIR/F160W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+     ENDIF
+  endelse
 
-;when both grisms are available, work on G102 as well
-    if keyword_set(both) then begin
+ printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F160W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F160W_UVIS_sci.fits")'
+ printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F160W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F160W_UVIS_wht.fits")'
+ printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F160W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F160W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
 
-; readcol,path3+'G102_clean.list',G102_list,format=('A') ;I.B. modified 2016
-       readcol,path5+'G102_clean.list',G102_list,format=('A') 
-       numG102 = n_elements(G102_list)
-       
-;###############################
-;if F140 only, stop here
-       if keyword_set(F140only) then begin
-          if numG102 gt 1 then begin
-             printf,10,'                '
-             ;printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-             printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-          endif else begin
-             ;printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-             printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-          endelse
-       endif else begin
-;not only F140, add F110 drizzle
-; readcol,path3+'F110_clean.list',f110_list,format=('A') ;I.B. modified 2016
- readcol,path4+'F110_clean.list',f110_list,format=('A') ;I.B. modified 2016
-          num = n_elements(f110_list)
-         if f110_list[0] ne 'none' then begin
-; h=headfits(path3+strmid(f110_list[0],0,13)+'.fits')  ;I.B. modified 2016
-          h=headfits(path4+strmid(f110_list[0],0,13)+'.fits')  ;I.B. modified 2016
-          ra10=strcompress(sxpar(h,'RA_TARG'),/remove_all)
-          dec10=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
-         endif
-if not keyword_set(single) then    goto,nodirectdrz110
-         printf,10,'                '        
-;          printf,10,'iraf.fixpix(images="@F110_clean.list'+'//[1]%''",masks="'+configpath+$
-;                 'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'  
-          printf,10,'iraf.fixpix(images="@F110_clean.list'+'//[1]%''",masks="'+configpath+$
-                 'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'  
-          if numG102 gt 1 then begin
-             ;printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-             printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-          endif else begin
-             ;printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-             printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
-          endelse
-          if num gt 1 then begin
-             ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' ;
-             printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)' ;
-          endif else begin
-             ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)';,final_scale=0.08,final_pixfrac=0.75
-             printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)';,final_scale=0.08,final_pixfrac=0.75
-          endelse
-          printf,10,'iraf.imcopy(input="F110W_drz.fits[1]", output="F110W_sci.fits")'
-          printf,10,'iraf.imcopy(input="F110W_drz.fits[2]", output="F110W_wht.fits")'
-          ;;; printf,10,'iraf.imcalc(input="F110W_wht.fits", output="F110W_rms.fits", equals="1.66354/sqrt(im1)")'
-          printf,10,'iraf.imcalc(input="F110W_wht.fits", output="F110W_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-          nodirectdrz110:
-;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
-    if keyword_set(uvis) then begin 
-            printf,10,'                '
-            if num gt 1 then begin
-               ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-               printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-          endif else begin
-               ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-               printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-            endelse
-          printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F110W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F110W_UVIS_sci.fits")'
-            printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F110W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F110W_UVIS_wht.fits")'
-            ;;; printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F110W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F110W_UVIS_rms.fits", equals="2.8236/sqrt(im1)")'
-            printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F110W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F110W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-          if num gt 1 then begin
-            ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-            printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-          endif else begin
-            ;printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-            printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
-         endelse
-          printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F110W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F110W_IR_sci.fits")'
-            printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F110W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F110W_IR_wht.fits")'
-            ;;; printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F110W_IR_wht.fits", output="../UVIS/UVIStoIR/F110W_IR_rms.fits", equals="1.66354/sqrt(im1)")'
-            printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F110W_IR_wht.fits", output="../UVIS/UVIStoIR/F110W_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-         endif
-;========= removed north-up option =========
-;          if num gt 1 then begin
-;             printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_northup",num_cores=5,final_rot=0,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)'
-;          endif else begin
-;             printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_northup",num_cores=5,final_rot=0,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-;          endelse
-;       printf,10,'iraf.imcopy(input="F110W_northup_drz.fits[1]", output="F160W_northup_sci.fits")'
-;       printf,10,'iraf.imcopy(input="F110W_northup_drz.fits[2]", output="F160W_northup_wht.fits")'
-;       printf,10,'iraf.imcalc(input="F110W_northup_wht.fits", output="F160W_northup_rms.fits", equals="1.66354/sqrt(im1)")'
-       endelse
-       
-    endif
-
-;prepare uvis_driz.py
-    if keyword_set(uvis) then begin   
-       printf,11,'import os,string,time'
-       printf,11,'import sys'
-       printf,11,'import shutil'
-       printf,11,'from pyraf import iraf'
-       printf,11,'from iraf import stsdas, slitless, axe, dither'
-       printf,11,'import drizzlepac'
-       printf,11,'from drizzlepac import astrodrizzle'
-       printf,11,'from pyraf.irafpar import IrafParS'
-       printf,11,'from stsci.tools import teal'
-       printf,11, 'teal.unlearn("astrodrizzle")'
-
-       
-;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
-;prepare uvis_initial_driz.py
-       printf,12,'import os,string,time'
-       printf,12,'import sys'
-       printf,12,'import shutil'
-       printf,12,'from pyraf import iraf'
-       printf,12,'from iraf import stsdas, slitless, axe, dither'
-       printf,12,'import drizzlepac'
-       printf,12,'from drizzlepac import astrodrizzle'
-       printf,12,'from pyraf.irafpar import IrafParS'
-       printf,12,'from stsci.tools import teal'
-       printf,12, 'teal.unlearn("astrodrizzle")'
-;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
-       printf,12,'                '
-       ;printf,12,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-       printf,12,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-       printf,12,'iraf.imcopy(input="UVIS2_drz.fits[1]", output="UVIS2_sci.fits")'
-       printf,12,'iraf.imcopy(input="UVIS2_drz.fits[2]", output="UVIS2_wht.fits")'
-       ;;; printf,12,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.5/sqrt(im1)")'
-       printf,12,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
-
-;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
-;prepare uvis_updatewcs.py
-       printf,13,'import os,string,time'
-       printf,13,'import sys'
-       printf,13,'import shutil'
-       printf,13,'from pyraf import iraf'
-       printf,13,'from iraf import stsdas, slitless, axe, dither'
-       printf,13,'import drizzlepac'
-       printf,13,'from drizzlepac import astrodrizzle'
-       printf,13,'from pyraf.irafpar import IrafParS'
-       printf,13,'from stsci.tools import teal'
-       printf,13,'from stwcs import updatewcs'
-       printf,13, 'teal.unlearn("astrodrizzle")'
-;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
-       printf,13, 'updatewcs.updatewcs("@UVIS2.list")'
-;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
-
-
-       
-      ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-      ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list",shiftfile="shift_600.list", output="UVIS2",final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-      printf,11,'                '
-      ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-      printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-      printf,11,'iraf.imcopy(input="UVIS2_drz.fits[1]", output="UVIS2_sci.fits")'
-      printf,11,'iraf.imcopy(input="UVIS2_drz.fits[2]", output="UVIS2_wht.fits")'
-      ;;; printf,11,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.5/sqrt(im1)")'
-      printf,11,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-      ; IR to UVIS
-      printf,11,'                '
-            ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="IRtoUVIS/UVIS2_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra+',final_dec='+dec+')'
-            printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="IRtoUVIS/UVIS2_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra+',final_dec='+dec+')'
-            printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS2_UVIS_drz.fits[1]", output="IRtoUVIS/UVIS2_UVIS_sci.fits")'
-            printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS2_UVIS_drz.fits[2]", output="IRtoUVIS/UVIS2_UVIS_wht.fits")'
-            ;;; printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS2_UVIS_wht.fits", output="IRtoUVIS/UVIS2_UVIS_rms.fits", equals="1.5/sqrt(im1)")'
-            printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS2_UVIS_wht.fits", output="IRtoUVIS/UVIS2_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-
-      ; UVIS to IR
-            ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIStoIR/UVIS2_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra+',final_dec='+dec+')'
-            printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIStoIR/UVIS2_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra+',final_dec='+dec+')'
-            printf,11,'iraf.imcopy(input="UVIStoIR/UVIS2_IR_drz.fits[1]", output="UVIStoIR/UVIS2_IR_sci.fits")'
-            printf,11,'iraf.imcopy(input="UVIStoIR/UVIS2_IR_drz.fits[2]", output="UVIStoIR/UVIS2_IR_wht.fits")'
-            ;;; printf,11,'iraf.imcalc(input="UVIStoIR/UVIS2_IR_wht.fits", output="UVIStoIR/UVIS2_IR_rms.fits", equals="1.11/sqrt(im1)")'
-            printf,11,'iraf.imcalc(input="UVIStoIR/UVIS2_IR_wht.fits", output="UVIStoIR/UVIS2_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-      if file_test(path2+'DATA/UVIS/'+'UVIS1.list') then begin
-         if file_lines(path2+'DATA/UVIS/'+'UVIS1.list') gt 0 then begin
-            ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list",shiftfile="shift_475.list", output="UVIS1",final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-            printf,11,'                '
-            printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-            printf,11,'iraf.imcopy(input="UVIS1_drz.fits[1]", output="UVIS1_sci.fits")'
-            printf,11,'iraf.imcopy(input="UVIS1_drz.fits[2]", output="UVIS1_wht.fits")'
-            ;;; printf,11,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.5/sqrt(im1)")'
-            printf,11,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
-            ;printf,12,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-            printf,12,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
-            printf,12,'iraf.imcopy(input="UVIS1_drz.fits[1]", output="UVIS1_sci.fits")'
-            printf,12,'iraf.imcopy(input="UVIS1_drz.fits[2]", output="UVIS1_wht.fits")'
-            ;;; printf,12,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.5/sqrt(im1)")'
-            printf,12,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
-;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
-       printf,13, 'updatewcs.updatewcs("@UVIS1.list")'
-;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
-      ; IR to UVIS
-            printf,11,'                '
-            ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="IRtoUVIS/UVIS1_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra10+',final_dec='+dec10+')'
-            printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="IRtoUVIS/UVIS1_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra10+',final_dec='+dec10+')'
-            printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS1_UVIS_drz.fits[1]", output="IRtoUVIS/UVIS1_UVIS_sci.fits")'
-            printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS1_UVIS_drz.fits[2]", output="IRtoUVIS/UVIS1_UVIS_wht.fits")'
-            ;;; printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS1_UVIS_wht.fits", output="IRtoUVIS/UVIS1_UVIS_rms.fits", equals="1.5/sqrt(im1)")'
-            printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS1_UVIS_wht.fits", output="IRtoUVIS/UVIS1_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-      ; UVIS to IR
-            ;printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIStoIR/UVIS1_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra10+',final_dec='+dec10+')'
-            printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIStoIR/UVIS1_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra10+',final_dec='+dec10+')'
-            printf,11,'iraf.imcopy(input="UVIStoIR/UVIS1_IR_drz.fits[1]", output="UVIStoIR/UVIS1_IR_sci.fits")'
-            printf,11,'iraf.imcopy(input="UVIStoIR/UVIS1_IR_drz.fits[2]", output="UVIStoIR/UVIS1_IR_wht.fits")'
-            ;;; printf,11,'iraf.imcalc(input="UVIStoIR/UVIS1_IR_wht.fits", output="UVIStoIR/UVIS1_IR_rms.fits", equals="1.11/sqrt(im1)")'
-            printf,11,'iraf.imcalc(input="UVIStoIR/UVIS1_IR_wht.fits", output="UVIStoIR/UVIS1_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-         endif
-      endif
-     
-      ;********************
-; skip the north-up version
-;      printf,11, 'teal.unlearn("astrodrizzle")'
-;      printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2_northup",final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-;      if file_test(path2+'DATA/UVIS/'+'UVIS1.list') then begin
-;         if file_lines(path2+'DATA/UVIS/'+'UVIS1.list') gt 0 then begin
-;            printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1_northup",final_wcs=True,final_rot=0,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)' 
-;         endif
-;      endif
-
-   endif
-
+ printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F160W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F160W_IR_sci.fits")'
+ printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F160W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F160W_IR_wht.fits")'
+ printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F160W_IR_wht.fits", output="../UVIS/UVIStoIR/F160W_IR_rms.fits", equals="1.0/sqrt(im1)")'; NEW solution (Suggeste by Marc)
 
  endif
+
+
+endif 
+
+
+
+;=========if F160 image does not exist, use F140 as default in driz.py
+;       readcol,path4+'F140_clean.list',f140_list,format=('A')
+;       num140 = n_elements(f140_list)
+       
+if f140_list[0] ne 'none' then begin
+ ; ------------------------------------------------------------
+ h=headfits(path4+strmid(f140_list[0],0,13)+'.fits') 
+ ra=strcompress(sxpar(h,'RA_TARG'),/remove_all)
+ dec=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
+ ; ------------------------------------------------------------
+       
+ ;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
+ if uvis eq 'YES' then begin 
+
+  printf,10,'                '
+  if num140 gt 1 then begin
+   printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+   printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+  endif else begin
+   IF num140 gt 0 THEN printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/IRtoUVIS/F140W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+   IF num140 gt 0 THEN printf,10,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="../UVIS/UVIStoIR/F140W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+  endelse
+
+  printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F140W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F140W_UVIS_sci.fits")'
+  printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F140W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F140W_UVIS_wht.fits")'
+  printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F140W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F140W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+  printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F140W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F140W_IR_sci.fits")'
+  printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F140W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F140W_IR_wht.fits")'
+  printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F140W_IR_wht.fits", output="../UVIS/UVIStoIR/F140W_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+ endif
+
+endif
+
+
+
+
+if both eq 'YES' then begin
+
+ if H_only eq 'YES' then begin
+          
+  if numG102 gt 1 then begin
+   printf,10,'                '
+   printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+  endif else begin
+   IF numG102 gt 0 then printf,10,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
+  endelse
+
+  if numG141 gt 1 then begin
+   printf,10,'                '
+   printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+  endif else begin
+   IF numG141 gt 0 then printf,10,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)' 
+  endelse
+
+
+ endif else begin ; IF NOT ONLY F140 ....
+
+        
+  if f110_list[0] ne 'none' then begin
+   h=headfits(path4+strmid(f110_list[0],0,13)+'.fits')  ;I.B. modified 2016
+   ra10=strcompress(sxpar(h,'RA_TARG'),/remove_all)
+   dec10=strcompress(sxpar(h,'DEC_TARG'),/remove_all)
+  endif
+
+
+          
+;========= if uvis exist, add the IRtoUVIS & UVIStoIR options ===========
+  if uvis eq 'YES' then begin 
+
+   printf,10,'                '
+   if num110 gt 1 then begin
+    printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+    printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+   endif else begin
+    printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/IRtoUVIS/F110W_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.04,final_outnx=4800,final_outny=4800, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+    printf,10,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="../UVIS/UVIStoIR/F110W_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.13,final_outnx=1600,final_outny=1600, final_pixfrac=0.75,final_ra='+ra+',final_dec='+dec+')'
+   endelse
+
+   printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F110W_UVIS_drz.fits[1]", output="../UVIS/IRtoUVIS/F110W_UVIS_sci.fits")'
+   printf,10,'iraf.imcopy(input="../UVIS/IRtoUVIS/F110W_UVIS_drz.fits[2]", output="../UVIS/IRtoUVIS/F110W_UVIS_wht.fits")'
+   printf,10,'iraf.imcalc(input="../UVIS/IRtoUVIS/F110W_UVIS_wht.fits", output="../UVIS/IRtoUVIS/F110W_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+   printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F110W_IR_drz.fits[1]", output="../UVIS/UVIStoIR/F110W_IR_sci.fits")'
+   printf,10,'iraf.imcopy(input="../UVIS/UVIStoIR/F110W_IR_drz.fits[2]", output="../UVIS/UVIStoIR/F110W_IR_wht.fits")'
+   printf,10,'iraf.imcalc(input="../UVIS/UVIStoIR/F110W_IR_wht.fits", output="../UVIS/UVIStoIR/F110W_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+  endif
+
+ endelse 
+       
+endif
+
+ 
+;prepare uvis_driz.py
+if uvis eq 'YES' then begin   
+
+ ;%%%%%%%%%%%%%%%%%%%   11   %%%%%%%%%%%%%%%%%%%%%%
+ printf,11,'import os,string,time'
+ printf,11,'import sys'
+ printf,11,'import shutil'
+ printf,11,'from pyraf import iraf'
+ printf,11,'from iraf import stsdas, slitless, axe, dither'
+ printf,11,'import drizzlepac'
+ printf,11,'from drizzlepac import astrodrizzle'
+ printf,11,'from pyraf.irafpar import IrafParS'
+ printf,11,'from stsci.tools import teal'
+ printf,11, 'teal.unlearn("astrodrizzle")'
+ ;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
+ ;prepare uvis_initial_driz.py
+ printf,12,'import os,string,time'
+ printf,12,'import sys'
+ printf,12,'import shutil'
+ printf,12,'from pyraf import iraf'
+ printf,12,'from iraf import stsdas, slitless, axe, dither'
+ printf,12,'import drizzlepac'
+ printf,12,'from drizzlepac import astrodrizzle'
+ printf,12,'from pyraf.irafpar import IrafParS'
+ printf,12,'from stsci.tools import teal'
+ printf,12, 'teal.unlearn("astrodrizzle")'
+ ;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
+ printf,12,'                '
+ printf,12,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+ printf,12,'iraf.imcopy(input="UVIS2_drz.fits[1]", output="UVIS2_sci.fits")'
+ printf,12,'iraf.imcopy(input="UVIS2_drz.fits[2]", output="UVIS2_wht.fits")'
+ printf,12,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+ ;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
+
+ ;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
+ ;prepare uvis_updatewcs.py
+ printf,13,'import os,string,time'
+ printf,13,'import sys'
+ printf,13,'import shutil'
+ printf,13,'from pyraf import iraf'
+ printf,13,'from iraf import stsdas, slitless, axe, dither'
+ printf,13,'import drizzlepac'
+ printf,13,'from drizzlepac import astrodrizzle'
+ printf,13,'from pyraf.irafpar import IrafParS'
+ printf,13,'from stsci.tools import teal'
+ printf,13,'from stwcs import updatewcs'
+ printf,13, 'teal.unlearn("astrodrizzle")'
+ ;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
+ printf,13, 'updatewcs.updatewcs("@UVIS2.list")'
+ ;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
+
+
+
+ printf,11,'                '
+ printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIS2",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+ printf,11,'iraf.imcopy(input="UVIS2_drz.fits[1]", output="UVIS2_sci.fits")'
+ printf,11,'iraf.imcopy(input="UVIS2_drz.fits[2]", output="UVIS2_wht.fits")'
+ printf,11,'iraf.imcalc(input="UVIS2_wht.fits", output="UVIS2_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+ ; IR to UVIS
+ printf,11,'                '
+ printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="IRtoUVIS/UVIS2_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra+',final_dec='+dec+')'
+ printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS2_UVIS_drz.fits[1]", output="IRtoUVIS/UVIS2_UVIS_sci.fits")'
+ printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS2_UVIS_drz.fits[2]", output="IRtoUVIS/UVIS2_UVIS_wht.fits")'
+ printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS2_UVIS_wht.fits", output="IRtoUVIS/UVIS2_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+ ; UVIS to IR
+ printf,11,'astrodrizzle.AstroDrizzle("@UVIS2.list", output="UVIStoIR/UVIS2_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra+',final_dec='+dec+')'
+ printf,11,'iraf.imcopy(input="UVIStoIR/UVIS2_IR_drz.fits[1]", output="UVIStoIR/UVIS2_IR_sci.fits")'
+ printf,11,'iraf.imcopy(input="UVIStoIR/UVIS2_IR_drz.fits[2]", output="UVIStoIR/UVIS2_IR_wht.fits")'
+ printf,11,'iraf.imcalc(input="UVIStoIR/UVIS2_IR_wht.fits", output="UVIStoIR/UVIS2_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+ 
+ if file_test(path2+'DATA/UVIS/'+'UVIS1.list') then begin
+  if file_lines(path2+'DATA/UVIS/'+'UVIS1.list') gt 0 then begin
+
+   printf,11,'                '
+   printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+   printf,11,'iraf.imcopy(input="UVIS1_drz.fits[1]", output="UVIS1_sci.fits")'
+   printf,11,'iraf.imcopy(input="UVIS1_drz.fits[2]", output="UVIS1_wht.fits")'
+   printf,11,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
+   printf,12,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIS1",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' 
+   printf,12,'iraf.imcopy(input="UVIS1_drz.fits[1]", output="UVIS1_sci.fits")'
+   printf,12,'iraf.imcopy(input="UVIS1_drz.fits[2]", output="UVIS1_wht.fits")'
+   printf,12,'iraf.imcalc(input="UVIS1_wht.fits", output="UVIS1_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+;%%%%%%%%%%%%%%%%%%%   12   %%%%%%%%%%%%%%%%%%%%%%
+;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
+   printf,13, 'updatewcs.updatewcs("@UVIS1.list")'
+;xxxxxxxxxxxxxxxxxxx   13   xxxxxxxxxxxxxxxxxxxxxx
+
+   ; IR to UVIS
+   printf,11,'                '
+   printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="IRtoUVIS/UVIS1_UVIS",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.04,final_outnx=4800,final_outny=4800,final_ra='+ra10+',final_dec='+dec10+')'
+   printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS1_UVIS_drz.fits[1]", output="IRtoUVIS/UVIS1_UVIS_sci.fits")'
+   printf,11,'iraf.imcopy(input="IRtoUVIS/UVIS1_UVIS_drz.fits[2]", output="IRtoUVIS/UVIS1_UVIS_wht.fits")'
+   printf,11,'iraf.imcalc(input="IRtoUVIS/UVIS1_UVIS_wht.fits", output="IRtoUVIS/UVIS1_UVIS_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+   ; UVIS to IR
+   printf,11,'astrodrizzle.AstroDrizzle("@UVIS1.list", output="UVIStoIR/UVIS1_IR",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.13,final_outnx=1600,final_outny=1600,final_ra='+ra10+',final_dec='+dec10+')'
+   printf,11,'iraf.imcopy(input="UVIStoIR/UVIS1_IR_drz.fits[1]", output="UVIStoIR/UVIS1_IR_sci.fits")'
+   printf,11,'iraf.imcopy(input="UVIStoIR/UVIS1_IR_drz.fits[2]", output="UVIStoIR/UVIS1_IR_wht.fits")'
+   printf,11,'iraf.imcalc(input="UVIStoIR/UVIS1_IR_wht.fits", output="UVIStoIR/UVIS1_IR_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+
+  endif
+ endif
+
+endif
+
+
 
 close,10,11,12,13,14
 free_lun,10,11,12,13,14
