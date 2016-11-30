@@ -28,7 +28,9 @@
 ;#    F475X  --> UVIS1 (idem for F475)
 ;#    F600LP --> UVIS2 (idem for F600)
 ;###############################################################
-pro process_IB2,field,uvis=uvis, path0, pathc
+
+;pro process_IB2,field,uvis=uvis, path0, pathc
+pro process_IB2,field, path0, pathc
 
 ;droppath="~/WISPIPE/aXe/" ; for copying files
 ;path="~/data2/WISPS/aXe/" ; This is where data will end up
@@ -258,12 +260,17 @@ print,filter
 
   endfor
 
+
      ; Prepare for UVIS Reductions  
      ;============================================= 
-   if keyword_set(uvis) then begin
+   spawn, 'ls -1 '+path2+'DATA/UVIS/*flt.fits',uvis_list
+   
+;   if keyword_set(uvis) then begin
+   if n_elements(uvis_list) ge 1 and uvis_list[0] ne '' and  strlowcase(uvis_list[0]) ne 'none' then begin
+      
 ; spawn,'cp '+pathc+'/aXe/tweakreg_uvis.py '+path2+'DATA/UVIS' ; Removed by I.B. (now written in align_uvis.pro)
         spawn,'cp '+expand_path(pathc)+'/aXe/make_uvis_helpfile.py '+path2+'DATA/UVIS'
-        spawn, 'ls -1 '+path2+'DATA/UVIS/*flt.fits',uvis_list
+;        spawn, 'ls -1 '+path2+'DATA/UVIS/*flt.fits',uvis_list
         for m=0,n_elements(uvis_list)-1 do begin
            name=uvis_list(m)
            h=headfits(name)

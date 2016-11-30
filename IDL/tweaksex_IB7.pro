@@ -53,192 +53,266 @@
 ;#   iraf.imcalc(input="input_wht.fits", output="output_rms.fits", equals="value/sqrt(im1)")
 ;#   
 ;###############################################################
-pro tweaksex_IB7,field,path0,pathconf,F140only=F140only
+;pro tweaksex_IB7,field,path0,pathconf,F140only=F140only
+pro tweaksex_IB7,field,path0,pathconf
 
-  path = expand_path(path0)+'/aXe/'+field+'/'
-  configpath = expand_path(pathconf)+'/aXe/CONFIG/'
+path = expand_path(path0)+'/aXe/'+field+'/'
+configpath = expand_path(pathconf)+'/aXe/CONFIG/'
 
 ;path = '/Volumes/Kudo/DATA/WISPS/aXe/Par288-full/'
 ;tweaksex,'Par288-full','/Volumes/Kudo/DATA/WISPS'
 
-readcol,path+'DATA/DIRECT/F110_crclean.list',f110_list,format=('A')
-readcol,path+'DATA/DIRECT_GRISM/F160_clean.list',f160_list0,format=('A')
-
-if  f160_list0[0] ne 'none' then readcol,path+'DATA/DIRECT/F160_crclean.list',f160_list,format=('A')
-if  f160_list0[0] eq 'none' then readcol,path+'DATA/DIRECT/F140_crclean.list',f140_list,format=('A')
-
-;   spawn,'cp '+path+'DATA/DIRECT/'+f110_list[0]+' '+path+'DATA/DIRECT/ref.crclean.fits'
-;   spawn,'cp '+path+'DATA/DIRECT/'+f110_list[0]+'.coo '+path+'DATA/DIRECT/ref.crclean.fits.coo'
-;   spawn,'cp '+path+'DATA/DIRECT/'+f110_list[0]+' '+path+'DATA/DIRECT/ref.crclean.fits'
-;   spawn,'cp '+path+'DATA/DIRECT/'+f110_list[0]+'.coo '+path+'DATA/DIRECT/ref.crclean.fits.coo'
 
 
-; Run SExtractor on CR cleaned direct flt images
-; **************************************
-for i = 0, n_elements(f110_list)-1 do begin
-    h1=headfits(path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits') 
-    exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
-    if exptime1 gt 1041 then det='1.9'
-    if exptime1 le 1041 then det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits'+$
-          ' -parameters_name '+path+$
-          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
-          ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
-          'SEX/'+strmid(f110_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; OBS CHECK 
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+print, 'tweaksex'
+J_OBS='NO' ; NO or YES observations in the F102 band
+H_OBS='NO' ; NO, F140 or F160
+f110_list='none'
+f140_list='none'
+f160_list='none'
+;------------------------------------------------
+; IMPORTANT : cr-clean files are read (not just "clean")
+TEST_J=file_test(path+'DATA/DIRECT/F110_crclean.list',/zero_length) ; 1 if exists but no content
+TEST_JB=file_test(path+'DATA/DIRECT/F110_crclean.list') ; 1 if exists
+TEST_H1=file_test(path+'DATA/DIRECT/F140_crclean.list',/zero_length) ; 1 if exists but no content
+TEST_H1B=file_test(path+'DATA/DIRECT/F140_crclean.list') ; 1 if exists
+TEST_H2=file_test(path+'DATA/DIRECT/F160_crclean.list',/zero_length) ; 1 if exists but no content
+TEST_H2B=file_test(path+'DATA/DIRECT/F160_crclean.list') ; 1 if exists
+;------------------------------------------------
+;     J      ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_J eq 0 and TEST_JB eq 1 then begin
+   readcol,path+'DATA/DIRECT/F110_crclean.list',f110_list,format=('A')
+   if strlowcase(f110_list[0]) ne 'none' and n_elements(f110_list[0]) gt 0 then J_OBS='YES'
+ENDIF
+;     H      F140 / F160 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_H1 eq 0 and TEST_H1B eq 1 then begin
+   readcol,path+'DATA/DIRECT/F140_crclean.list',f140_list,format=('A')
+   if strlowcase(f140_list[0]) ne 'none' and n_elements(f140_list[0]) gt 0 then H_OBS='F140'
+ENDIF
+IF TEST_H2 eq 0 and TEST_H2B eq 1 then begin
+   readcol,path+'DATA/DIRECT/F160_crclean.list',f160_list,format=('A')
+   if strlowcase(f160_list[0]) ne 'none' and n_elements(f160_list[0]) gt 0 then H_OBS='F160'
+ENDIF
+print, 'HHHHHHHHHHHHHHHHH'
+print, TEST_J,TEST_JB
+print, TEST_H1,TEST_H1B
+print, TEST_H2,TEST_H2B
+print, 'J_OBS = '+J_OBS
+print, 'H_OBS = '+H_OBS
+print, 'HHHHHHHHHHHHHHHHH'
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; OBS CHECK END
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 
+
+;readcol,path+'DATA/DIRECT/F110_crclean.list',f110_list,format=('A')
+;readcol,path+'DATA/DIRECT_GRISM/F160_clean.list',f160_list0,format=('A')
+
+;if f160_list0[0] ne 'none' then readcol,path+'DATA/DIRECT/F160_crclean.list',f160_list,format=('A')
+;if f160_list0[0] eq 'none' then readcol,path+'DATA/DIRECT/F140_crclean.list',f140_list,format=('A')
+
+
+; **************************************************************
+; Run SExtractor on CR cleaned direct flt single exposures
+; **************************************************************
+IF J_OBS EQ 'YES' THEN BEGIN
+ for i = 0, n_elements(f110_list)-1 do begin
+  h1=headfits(path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits') 
+  exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
+  if exptime1 gt 1041 then det='1.9'
+  if exptime1 le 1041 then det='2.3'
+  spawn,'sex '+path+'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
+   'SEX/'+f110_list[i]+'.coo -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+   'DATA/DIRECT/'+strmid(f110_list[i],0,19)+'_crclean.fits[1]'+$
+   ' -parameters_name '+path+$
+   'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
+   ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
+   'SEX/'+strmid(f110_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
+   ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
    spawn,'cp '+path+'SEX/'+f110_list[i]+'.coo '+path+'DATA/DIRECT/'
-endfor
+ endfor
+ENDIF
 
-if f160_list0[0] ne 'none' then begin
-for i = 0, n_elements(f160_list)-1 do begin
-    h2=headfits(path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits') 
-    exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
-    det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f160_list[i]+'.coo -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits'+$
-          ' -parameters_name '+path+$
-          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
-          ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
-          'SEX/'+strmid(f160_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 16 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
-    spawn,'cp '+path+'SEX/'+f160_list[i]+'.coo '+path+'DATA/DIRECT/'
-endfor
-endif else begin
-   for i = 0, n_elements(f140_list)-1 do begin
-    h2=headfits(path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits') 
-    exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
-    det='2.0'
-    spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT -weight_image '+path+$
-          'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits'+$
-          ' -parameters_name '+path+$
-          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
-          ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
-          'SEX/'+strmid(f140_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
-    spawn,'cp '+path+'SEX/'+f140_list[i]+'.coo '+path+'DATA/DIRECT/'
-   endfor
-endelse
+IF H_OBS eq 'F160' THEN BEGIN
+ for i = 0, n_elements(f160_list)-1 do begin
+  h2=headfits(path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits') 
+  exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
+  det='2.3'
+  spawn,'sex '+path+'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
+   'SEX/'+f160_list[i]+'.coo -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+   'DATA/DIRECT/'+strmid(f160_list[i],0,19)+'_crclean.fits[1]'+$
+   ' -parameters_name '+path+$
+   'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
+   ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
+   'SEX/'+strmid(f160_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 16 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
+   ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
+  spawn,'cp '+path+'SEX/'+f160_list[i]+'.coo '+path+'DATA/DIRECT/'
+ endfor
+ENDIF
+
+IF H_OBS eq 'F140' THEN BEGIN
+ for i = 0, n_elements(f140_list)-1 do begin
+  h2=headfits(path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits') 
+  exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
+  det='2.0'
+  spawn,'sex '+path+'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits[0] -c '+path+'SEX/config.sex -catalog_name '+path+$
+   'SEX/'+f140_list[i]+'.coo -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_RMS -weight_image '+path+$
+   'DATA/DIRECT/'+strmid(f140_list[i],0,19)+'_crclean.fits[1]'+$
+   ' -parameters_name '+path+$
+   'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
+   ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+$
+   'SEX/'+strmid(f140_list[i],0,19)+'_crclean_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+$
+   ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
+  spawn,'cp '+path+'SEX/'+f140_list[i]+'.coo '+path+'DATA/DIRECT/'
+ endfor
+ENDIF
 
 
-;Run SExtractor on direct images
-;*************************************
+
+; **************************************************************
+; Run SExtractor on direct astrodrizzled images
+; **************************************************************
 
 ;F110W
-if not keyword_set(F140only) then begin
-   h1=headfits(path+'DATA/DIRECT/F110W_orig_drz.fits') 
-   exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
-if exptime1 gt 1041 then det='1.9'
-    if exptime1 le 1041 then det='2.3'
-    spawn,'sex '+path+'DATA/DIRECT/F110W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+$
-          'SEX/F110.cat -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+$
-          'DATA/DIRECT/F110W_orig_wht.fits,'+path+'DATA/DIRECT/F110W_orig_rms.fits -parameters_name '+path+$
-          'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
-          ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F110_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
-          ' -STARNNW_NAME '+path+'SEX/default.nnw'
-   spawn,'cp '+path+'SEX/F110.cat '+path+'DATA/DIRECT/'
-endif
+IF J_OBS EQ 'YES' THEN BEGIN
+ h1=headfits(path+'DATA/DIRECT/F110W_orig_drz.fits') 
+ exptime1=strcompress(sxpar(h1,'EXPTIME'),/remove_all)
+ if exptime1 gt 1041 then det='1.9'
+ if exptime1 le 1041 then det='2.3'
+ spawn,'sex '+path+'DATA/DIRECT/F110W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+$
+  'SEX/F110.cat -mag_zeropoint 26.83 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+$
+  'DATA/DIRECT/F110W_orig_wht.fits,'+path+'DATA/DIRECT/F110W_orig_rms.fits -parameters_name '+path+$
+  'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+$
+  ' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F110_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime1+$
+  ' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
+ spawn,'cp '+path+'SEX/F110.cat '+path+'DATA/DIRECT/'
+ENDIF
 
-if f160_list0[0] ne 'none' then begin
 ;F160W
-   h2=headfits(path+'DATA/DIRECT/F160W_orig_drz.fits') 
-   exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
-   det='2.3'
-   spawn,'sex '+path+'DATA/DIRECT/F160W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F160.cat -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F160W_orig_wht.fits,'+path+'DATA/DIRECT/F160W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F160_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw'
-   spawn,'cp '+path+'SEX/F160.cat '+path+'DATA/DIRECT/'
-endif else begin
+IF H_OBS eq 'F160' THEN BEGIN
+ h2=headfits(path+'DATA/DIRECT/F160W_orig_drz.fits') 
+ exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
+ det='2.3'
+ spawn,'sex '+path+'DATA/DIRECT/F160W_orig_sci.fits -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F160.cat -mag_zeropoint 25.96 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F160W_orig_wht.fits,'+path+'DATA/DIRECT/F160W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F160_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
+ spawn,'cp '+path+'SEX/F160.cat '+path+'DATA/DIRECT/'
+ENDIF
+
 ;F140W
-   for i = 0, n_elements(f140_list)-1 do begin
-   h2=headfits(path+'DATA/DIRECT/F140W_orig_drz.fits') 
-   exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
-   det='2.0'
-   spawn,'sex '+path+'DATA/DIRECT/F140W_orig_sci.fits'+' -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F140.cat -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F140W_orig_wht.fits,'+path+'DATA/DIRECT/F140W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F140_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw'
-   spawn,'cp '+path+'SEX/F140.cat '+path+'DATA/DIRECT/'
-   endfor
-endelse
+IF H_OBS eq 'F140' THEN BEGIN
+ for i = 0, n_elements(f140_list)-1 do begin
+  h2=headfits(path+'DATA/DIRECT/F140W_orig_drz.fits') 
+  exptime2=strcompress(sxpar(h2,'EXPTIME'),/remove_all)
+  det='2.0'
+  spawn,'sex '+path+'DATA/DIRECT/F140W_orig_sci.fits'+' -c '+path+'SEX/config.sex -catalog_name '+path+'SEX/F140.cat -mag_zeropoint 26.46 -WEIGHT_TYPE MAP_WEIGHT,MAP_RMS -weight_image '+path+'DATA/DIRECT/F140W_orig_wht.fits,'+path+'DATA/DIRECT/F140W_orig_rms.fits -parameters_name '+path+'SEX/config.param -filter Y -filter_name '+path+'SEX/gauss_2.0_5x5.conv -detect_minarea 6 -detect_thresh '+det+' -ANALYSIS_THRESH 2 -CHECKIMAGE_NAME '+path+'SEX/F140_seg.fits -DEBLEND_NTHRESH 64 -DEBLEND_MINCONT 0.005 -GAIN '+exptime2+' -STARNNW_NAME '+path+'SEX/default.nnw',/sh  
+ spawn,'cp '+path+'SEX/F140.cat '+path+'DATA/DIRECT/'
+ endfor
+ENDIF
 
 
-;Now generate the python code to tweakreg each flt file to the
-;drizzled F110W file
-;*************************************
+;**************************************************************
+; Generate python code to tweakreg each flt exposure to the
+; drizzled F110W or F140 or F160 reference
+;**************************************************************
 openw,6,path+'DATA/DIRECT/tweakreg.py'
 openw,7,path+'DATA/GRISM/img_size.txt'
-   printf,6,'import os,string,time'
-   printf,6,'import sys'
-   printf,6,'import shutil'
-   printf,6,'from pyraf import iraf'
-   printf,6,'from iraf import stsdas, dither'
-   printf,6,'from pyraf.irafpar import IrafParS'
-   printf,6,'from stsci.tools import teal'
-   printf,6,'import drizzlepac'
-   printf,6,'from drizzlepac import tweakreg'
-   printf,6,'from drizzlepac import astrodrizzle'
-   printf,6,'from drizzlepac import tweakback'
-   printf,6,'import glob'
-   printf,6,'from stwcs import wcsutil'
-   printf,6,'import stwcs.wcsutil.headerlet'
-   printf,6,'                '
 
-;generate the position-shift headerlet for the crclean.fits as
-;compared to F110W_orig_drz.fits
-;*************************************
 
+printf,6,'import os,string,time'
+printf,6,'import sys'
+printf,6,'import shutil'
+printf,6,'from pyraf import iraf'
+printf,6,'from iraf import stsdas, dither'
+printf,6,'from pyraf.irafpar import IrafParS'
+printf,6,'from stsci.tools import teal'
+printf,6,'import drizzlepac'
+printf,6,'from drizzlepac import tweakreg'
+printf,6,'from drizzlepac import astrodrizzle'
+printf,6,'from drizzlepac import tweakback'
+printf,6,'import glob'
+printf,6,'from stwcs import wcsutil'
+printf,6,'import stwcs.wcsutil.headerlet'
+printf,6,'                '
+
+
+;**************************************************************
+; Compute shift headerlet for the crclean.fits as compared
+; to reference image (ex. F110W_orig_drz.fits)
+;**************************************************************
 ; NOTE:
-; For the "clean" images, updatehdr=False because the header is update
-; in the next passage using the headerlets of the cr-clean images !!
-if not keyword_set(F140only) then begin
+; updatehdr=False because the header is updated in the next
+; passage using the headerlets of the cr-clean images !!
 
-printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="F110W_orig_drz.fits",refcat="F110.cat",  wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_clean.txt", headerlet=True,fitgeometry="shift")'
+PPP=0
 
-printf,6,'tweakreg.TweakReg("@direct_crclean.list",catfile="direct_crclean_catfile.list", refimage="F110W_orig_drz.fits",refcat="F110.cat", wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_crclean.txt", headerlet=True,fitgeometry="shift")'
+;F110W is the reference image if present ------------------------------
+IF J_OBS EQ 'YES' THEN BEGIN
+ printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="F110W_orig_drz.fits",refcat="F110.cat",  wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_clean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
+   
+ printf,6,'tweakreg.TweakReg("@direct_crclean.list",catfile="direct_crclean_catfile.list", refimage="F110W_orig_drz.fits",refcat="F110.cat", wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_crclean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
+PPP=PPP+1
+ENDIF
 
-endif else begin
-printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="F140W_orig_drz.fits",refcat="F140.cat",  wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_clean.txt", headerlet=True,fitgeometry="shift")'
+IF J_OBS NE 'YES' THEN BEGIN
+;F160W is the reference image if no F110 present ------------------------------
+  IF H_OBS eq 'F160' THEN BEGIN
+   printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="F160W_orig_drz.fits",refcat="F160.cat",  wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_clean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
 
-printf,6,'tweakreg.TweakReg("@direct_crclean.list",catfile="direct_crclean_catfile.list", refimage="F140W_orig_drz.fits",refcat="F140.cat", wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_crclean.txt", headerlet=True,fitgeometry="shift")'
+   printf,6,'tweakreg.TweakReg("@direct_crclean.list",catfile="direct_crclean_catfile.list", refimage="F160W_orig_drz.fits",refcat="F160.cat", wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_crclean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
+ PPP=PPP+1
+ ENDIF
+ ;Otherwise, use F140 ------------------------------
+ IF H_OBS eq 'F140' THEN BEGIN
+  printf,6,'tweakreg.TweakReg("@direct_clean.list",catfile="direct_clean_catfile.list", refimage="F140W_orig_drz.fits",refcat="F140.cat",  wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_clean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
 
-endelse
+  printf,6,'tweakreg.TweakReg("@direct_crclean.list",catfile="direct_crclean_catfile.list", refimage="F140W_orig_drz.fits",refcat="F140.cat", wcsname="shift1", updatehdr=False, updatewcs=False,xcol=2, ycol=3, fluxcol=12, fluxunits="mag", xyunits="pixels",  refxcol=7, refycol=8, refxyunits="degrees", rfluxcol=12, rfluxunits="mag", minobj=15, searchrad=1.0, sigma=4.0, nclip=3, shiftfile=True,outshifts="shift_pos_drz_crclean.txt", headerlet=True,fitgeometry="shift",interactive=False)'
+  PPP=PPP+1
+ ENDIF
+ENDIF
+
+IF PPP ne 1 then begin
+   print, "ERROR: tweaksex.pro did not worlk properly"
+   stop
+ENDIF
 
 
 
-;    wcsname="tweakcrcleaned",
-; interactive=False
-
+;**************************************************************
 ;apply the headerlet to each exposure's direct image (clean)
-;*************************************
+;**************************************************************
+
    printf,6,'                '
    printf,6,'from stsci.tools import teal'
    printf,6,'import stwcs'
    printf,6,'cobj = teal.teal("apply_headerlet", loadOnly=True)'
    printf,6,'                '   
 
-for i = 0, n_elements(f110_list)-1 do begin
-   printf,6,'cobj["filename"] = "'+strmid(f110_list[i],0,19)+'.fits"'
-;   xxx-IVANO-xxx
-; OLD:
-;    printf,6,'cobj["hdrlet"] = "'+strmid(f110_list[i],0,19)+'_hlet.fits"'
-; NEW:
-   printf,6,'cobj["hdrlet"] = "'+strmid(f110_list[i],0,19)+'_crclean_hlet.fits"'
-;   xxx-IVANO-xxx
-   printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
-endfor
+IF J_OBS EQ 'YES' THEN BEGIN
+ for i = 0, n_elements(f110_list)-1 do begin
+  printf,6,'cobj["filename"] = "'+strmid(f110_list[i],0,19)+'.fits"'
+  printf,6,'cobj["hdrlet"] = "'+strmid(f110_list[i],0,19)+'_crclean_hlet.fits"'
+  printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
+ endfor
+ENDIF
 
-if f160_list0[0] ne 'none' then begin
-   for i = 0, n_elements(f160_list)-1 do begin
-   printf,6,'cobj["filename"] = "'+strmid(f160_list[i],0,19)+'.fits"'
-   printf,6,'cobj["hdrlet"] = "'+strmid(f160_list[i],0,19)+'_crclean_hlet.fits"'
-   printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
-   endfor
-endif else begin
-   for i = 0, n_elements(f140_list)-1 do begin
-   printf,6,'cobj["filename"] = "'+strmid(f140_list[i],0,19)+'.fits"'
-   printf,6,'cobj["hdrlet"] = "'+strmid(f140_list[i],0,19)+'_crclean_hlet.fits"'
-   printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
-   endfor
-endelse
+IF H_OBS eq 'F160' THEN BEGIN
+ for i = 0, n_elements(f160_list)-1 do begin
+  printf,6,'cobj["filename"] = "'+strmid(f160_list[i],0,19)+'.fits"'
+  printf,6,'cobj["hdrlet"] = "'+strmid(f160_list[i],0,19)+'_crclean_hlet.fits"'
+  printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
+ endfor
+ENDIF
+
+IF H_OBS eq 'F140' THEN BEGIN
+ for i = 0, n_elements(f140_list)-1 do begin
+  printf,6,'cobj["filename"] = "'+strmid(f140_list[i],0,19)+'.fits"'
+  printf,6,'cobj["hdrlet"] = "'+strmid(f140_list[i],0,19)+'_crclean_hlet.fits"'
+  printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
+ endfor
+ENDIF
+
 
 
 
@@ -253,8 +327,10 @@ endelse
 ; assuming the shifts between F110 and F160 less than this value
 ;
 ; READ image header
-if  f160_list0[0] ne 'none' then img_ref_name=path+'DATA/DIRECT/F160W_orig_drz.fits'
-if  f160_list0[0] eq 'none' then img_ref_name=path+'DATA/DIRECT/F140W_orig_drz.fits'
+IF H_OBS eq 'F140' THEN img_ref_name=path+'DATA/DIRECT/F140W_orig_drz.fits'
+IF H_OBS eq 'F160' THEN img_ref_name=path+'DATA/DIRECT/F160W_orig_drz.fits'
+IF H_OBS eq 'NO' THEN img_ref_name=path+'DATA/DIRECT/F110W_orig_drz.fits'
+
 HD_im_ref=headfits(img_ref_name,EXTEN=1)
 ; Extract astrometry values
 EXTAST,HD_im_ref,ASTROREF
@@ -284,10 +360,8 @@ DELTAPIX=sqrt((DELTA_PIX_X^2.)+(DELTA_PIX_Y^2.))
 ORIG_PIXSCALE=(DELTADEC/DELTAPIX)*3600.d ;[arcsec/pix]
 
 
-
 ; TEST TEST TEST TEST
 ; ORIG_PIXSCALE=0.128254
-
 
 
 ; XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -320,68 +394,62 @@ printf,7, NXpixels_tot+' '+NYpixels_tot+' '+RA_ref+' '+dec_ref
 
 
 
-;now drizzled to get the twked images
-;**********************
-   printf,6,'                '
-  ; printf,6,'iraf.fixpix(images="@F110_clean.list'+'//[1]%''",masks="'+configpath+$
-  ;        'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'
-   printf,6,'iraf.fixpix(images="@F110_clean.list'+'//[1]%''",masks="'+configpath+$
+;**************************************************************
+; Final drizzle to get the twked images
+;**************************************************************
+
+printf,6,'                '
+
+IF J_OBS EQ 'YES' THEN BEGIN
+ printf,6,'iraf.fixpix(images="@F110_clean.list'+'//[1]%''",masks="'+configpath+$
           'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
-   num = n_elements(f110_list)
-   if num gt 1 then begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
-      printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ num = n_elements(f110_list)
+ if num gt 1 then begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endif else begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endelse
+ printf,6,'iraf.imcopy(input="F110W_twk_drz.fits[1]", output="F110W_twk_sci.fits")'
+ printf,6,'iraf.imcopy(input="F110W_twk_drz.fits[2]", output="F110W_twk_wht.fits")'
+ ;;; printf,6,'iraf.imcalc(input="F110W_twk_wht.fits", output="F110W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
+ printf,6,'iraf.imcalc(input="F110W_twk_wht.fits", output="F110W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+ENDIF
 
-   endif else begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-      printf,6,'astrodrizzle.AstroDrizzle("@F110_clean.list", output="F110W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
-
-   endelse   
-   printf,6,'iraf.imcopy(input="F110W_twk_drz.fits[1]", output="F110W_twk_sci.fits")'
-   printf,6,'iraf.imcopy(input="F110W_twk_drz.fits[2]", output="F110W_twk_wht.fits")'
-   ;;; printf,6,'iraf.imcalc(input="F110W_twk_wht.fits", output="F110W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
-   printf,6,'iraf.imcalc(input="F110W_twk_wht.fits", output="F110W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-
-if f160_list0[0] ne 'none' then begin
-  ; printf,6,'iraf.fixpix(images="@F160_clean.list'+'//[1]%''",masks="'+configpath+$
-  ;            'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'
-   printf,6,'iraf.fixpix(images="@F160_clean.list'+'//[1]%''",masks="'+configpath+$
-              'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
-   num = n_elements(f160_list)
-   if num gt 1 then begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
-      printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
-
-
-      endif else begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-      printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
-
-      endelse
-   
-   printf,6,'iraf.imcopy(input="F160W_twk_drz.fits[1]", output="F160W_twk_sci.fits")'
-   printf,6,'iraf.imcopy(input="F160W_twk_drz.fits[2]", output="F160W_twk_wht.fits")'
-   ;;; printf,6,'iraf.imcalc(input="F160W_twk_wht.fits", output="F160W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
-   printf,6,'iraf.imcalc(input="F160W_twk_wht.fits", output="F160W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-endif else begin
-   ; printf,6,'iraf.fixpix(images="@F140_clean.list'+'//[1]%''",masks="'+configpath+$
-   ;       'bp_mask_v5.pl",linterp=1000,cinterp="INDEF")'
-   printf,6,'iraf.fixpix(images="@F140_clean.list'+'//[1]%''",masks="'+configpath+$
+IF H_OBS eq 'F160' THEN BEGIN
+ printf,6,'iraf.fixpix(images="@F160_clean.list'+'//[1]%''",masks="'+configpath+$
           'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
-      num = n_elements(f140_list)
-      if num gt 1 then begin
-;         printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
-         printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ num = n_elements(f160_list)
+ if num gt 1 then begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endif else begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F160_clean.list", output="F160W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endelse
+ printf,6,'iraf.imcopy(input="F160W_twk_drz.fits[1]", output="F160W_twk_sci.fits")'
+ printf,6,'iraf.imcopy(input="F160W_twk_drz.fits[2]", output="F160W_twk_wht.fits")'
+ ;;; printf,6,'iraf.imcalc(input="F160W_twk_wht.fits", output="F160W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
+ printf,6,'iraf.imcalc(input="F160W_twk_wht.fits", output="F160W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+ENDIF
 
-       endif else begin
-;         printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
-         printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
-      endelse
-   printf,6,'iraf.imcopy(input="F140W_twk_drz.fits[1]", output="F140W_twk_sci.fits")'
-   printf,6,'iraf.imcopy(input="F140W_twk_drz.fits[2]", output="F140W_twk_wht.fits")'
-   ;;; printf,6,'iraf.imcalc(input="F140W_twk_wht.fits", output="F140W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
-   printf,6,'iraf.imcalc(input="F140W_twk_wht.fits", output="F140W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
-endelse   
+IF H_OBS eq 'F140' THEN BEGIN
+ printf,6,'iraf.fixpix(images="@F140_clean.list'+'//[1]%''",masks="'+configpath+$
+          'bp_mask_v6.pl",linterp=1000,cinterp="INDEF")'
+ num = n_elements(f140_list)
+ if num gt 1 then begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False, driz_cr_corr=True, driz_combine=True,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endif else begin
+  ; printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale=0.08,final_pixfrac=0.75)'
+  printf,6,'astrodrizzle.AstroDrizzle("@F140_clean.list", output="F140W_twk",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False,final_scale='+F_pxsc_str+',final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'
+ endelse
+ printf,6,'iraf.imcopy(input="F140W_twk_drz.fits[1]", output="F140W_twk_sci.fits")'
+ printf,6,'iraf.imcopy(input="F140W_twk_drz.fits[2]", output="F140W_twk_wht.fits")'
+ ;;; printf,6,'iraf.imcalc(input="F140W_twk_wht.fits", output="F140W_twk_rms.fits", equals="1.66354/sqrt(im1)")'
+ printf,6,'iraf.imcalc(input="F140W_twk_wht.fits", output="F140W_twk_rms.fits", equals="1.0/sqrt(im1)")' ; NEW solution (Suggeste by Marc)
+ENDIF
 
 
 close,6,7

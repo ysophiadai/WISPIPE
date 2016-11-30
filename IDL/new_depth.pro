@@ -218,7 +218,7 @@ value=value1[0:n_elements(gaussian)-1]
 endif
 
 loadct,13
-if plot eq 1 then oplot,value,gaussian,color=206      ;only plot the min and peak of the gaussian
+if plot eq 1 then oplot,value,gaussian,linestyle=1;,color=206      ;only plot the min and peak of the gaussian
 weight=1.d + value*0.d              ;same weight for all values
 
 a=[50.,median(sky),stddev(sky[where(sky lt thr)])]
@@ -228,7 +228,7 @@ fit=curvefit(value,gaussian,weight,a,function_name='gauss',/noderivative)
 
 ;print,a
 
-if plot eq 1 then oplot,value,fit,color=206,thick=5
+if plot eq 1 then oplot,value,fit;,color=206,thick=5
 
 ;print,'5 SIGMA [cps]=',5.d*1.5*a[2]
 ;print,'5 SIGMA [ABmag]=',-2.5*alog10(5.*1.5*abs(a[2]))+zeropoint
@@ -397,7 +397,7 @@ value=value1[0:n_elements(gaussian)-1]
 endif
 
 loadct,13
-if plot eq 1 then oplot,value,gaussian,color=206
+if plot eq 1 then oplot,value,gaussian,linestyle=2;,color=206
 weight=1.d + value*0.d
 
 a=[50.,median(sky),stddev(sky[where(sky lt thr)])]
@@ -406,7 +406,7 @@ fit=curvefit(value,gaussian,weight,a,function_name='gauss',/noderivative)
 
 ;print,a
 
-if plot eq 1 then oplot,value,fit,color=206,thick=5
+if plot eq 1 then oplot,value,fit;,color=206,thick=5
 
 ;print,'5 SIGMA [cps]=',5.d*1.5*a[2]
 ;print,'5 SIGMA [ABmag]=',-2.5*alog10(5.*1.5*abs(a[2]))+zeropoint

@@ -10,20 +10,23 @@
 # use findf.pro to check Q/A of flt before the pipeline
 # use qacheck.pro to check Q/A of drz.fits after the pipeline
 # use mastreadme.pro to prepare the tar file for mast delivery
-# Call in csh:  ./wispipe_uvis.sh Par# > & log#-[datetime].log
+# -- NO (use bash, not csh!) --> Call in csh:  ./wispipe_uvis.sh Par# > & log#.log
+# -- Call in bash using: source ./wispipe_uvis_F140.sh Par# >& log#.log
 ###############################################################
+
 
 ur_setup
 cd $WISPIPE/IDL/
 
 idl<< EOF
 .run process_IB2.pro
-process_IB2, "$1",/uvis,"$WISPDATA","$WISPIPE"
+process_IB2, "$1","$WISPDATA","$WISPIPE"
 .run cross_clean.pro
 .run im_clean_IB6.pro
-im_clean_IB6,"$1",/both,/uvis,"$WISPDATA","$WISPIPE"
+im_clean_IB6,"$1","$WISPDATA","$WISPIPE"
 EOF
 
+#               #A1
 
 ##########################################################################
 # Before everything, wcs are updated on grism and direct
@@ -40,6 +43,8 @@ idl<< EOF
 tweakprep_IB1,"$1","$WISPDATA"
 EOF
 
+#               #A2
+  
 ##########################################################################
 # Python code inserted for sky subtracion.
 # The reason for which it is located between tweakprep.pro and
@@ -54,7 +59,9 @@ python fit_multi_sky.py "$WISPIPE/aXe/CONFIG/grism_master_sky_v0.5/"
 ##########################################################################
 # sky subtraction - END
 ##########################################################################
-
+   
+ #               #A3
+ 
 cd $WISPDATA/aXe/$1/DATA/DIRECT/
 python tweakprep.py
 
@@ -82,7 +89,7 @@ new_drizprep_IB2,"$1","$WISPDATA"
 EOF
 
 # -------  A  ---------
-
+ 
 
 ##########################################################################
 ## UVIS SPECIFIC CODES
@@ -128,7 +135,7 @@ python uvis_driz.py
  # GRISM folders ONLY
 ####################################################################################
 
- cd $WISPIPE/IDL/
+cd $WISPIPE/IDL/
 idl<< EOF
 .run smooth_and_combine3.pro
 smooth_and_combine3,"$1","$WISPDATA"
@@ -238,3 +245,5 @@ cd $WISPDATA/aXe/$1
 tar -cvf "$1"_final_V6.1.tar Spectra Stamps DATA/DIRECT_GRISM/fin_F*.cat DATA/DIRECT_GRISM/*.reg DATA/DIRECT_GRISM/F*drz.fits DATA/DIRECT_GRISM/F*sci.fits DATA/DIRECT_GRISM/F*rms.fits DATA/DIRECT_GRISM/F*wht.fits DATA/DIRECT_GRISM/F*0.fits DATA/DIRECT_GRISM/JH*.fits DATA/DIRECT_GRISM/G*.fits SEX/F*full.cat  Plots/*.pdf G102_DRIZZLE G141_DRIZZLE DATA/UVIS/UVIS*.fits DATA/UVIS/UVIS*.list DATA/UVIS/*.txt DATA/UVIS/UVIStoIR DATA/UVIS/IRtoUVIS # DATA/DIRECT_GRISM/*_flag.cat SEX/cat_deblend_flag.cat
 
 gzip *.tar
+
+# -------  END  ---------

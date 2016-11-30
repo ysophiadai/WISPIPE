@@ -17,7 +17,7 @@
 ;
 ;###############################################################
 
-function BADPIX,filename,exten,dq
+function BADPIX,filename,exten,dq,BPM
 
 image=MRDFITS(filename,exten,/silent)
 dq_image=MRDFITS(dq,3,/silent)
@@ -164,7 +164,7 @@ bp:
 ; cleaning using the bad pixel mask
 ;********************************************
 
-bp_mask=MRDFITS('~/WISPIPE/aXe/CONFIG/bp_mask_v5.fits',0,/silent)
+bp_mask=MRDFITS(BPM,0,/silent)
 bp_mask_2=bp_mask
 
 

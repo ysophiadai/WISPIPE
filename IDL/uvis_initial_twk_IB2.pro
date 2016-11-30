@@ -55,7 +55,7 @@ printf,1,'from pyraf.irafpar import IrafParS'
 printf,1,'from drizzlepac import tweakback'
 
 ; TWEAKREG (note: only the "sci" extension is shifted).
-printf,1,"tweakreg.TweakReg('@initial_input.list', catfile='initial_in.cat', refimage='../DIRECT_GRISM/F110W_drz.fits', refcat='../../SEX/F110.cat', updatehdr='Yes',  wcsname='IRwcs' ,xcol=2, ycol=3, fluxcol=12, fluxunits='mag', xyunits='pixels', refxcol=7, refycol=8, refxyunits='degrees', rfluxcol=12, rfluxunits='mag', minobj=15, searchrad=2.0, sigma=2.0, nclip=15,fitgeometry='shift')"
+printf,1,"tweakreg.TweakReg('@initial_input.list', catfile='initial_in.cat', refimage='../DIRECT_GRISM/F110W_drz.fits', refcat='../../SEX/F110.cat', updatehdr='Yes',  wcsname='IRwcs' ,xcol=2, ycol=3, fluxcol=12, fluxunits='mag', xyunits='pixels', refxcol=7, refycol=8, refxyunits='degrees', rfluxcol=12, rfluxunits='mag', minobj=15, searchrad=2.0, sigma=2.0, nclip=15,fitgeometry='shift',interactive=False)"
 
 ; Tweakbak the ORIGINAL uvis exposures
 printf,1,"tweakback.tweakback('UVIS2_drz.fits',newname='IRwcs', input='@uvis_origUVIS2.list',force='True')"

@@ -9,23 +9,23 @@
 # use findf.pro to check Q/A of flt before the pipeline
 # use qacheck.pro to check Q/A of drz.fits after the pipeline
 # use mastreadme.pro to prepare the tar file for mast delivery
-# Call in csh:  ./wispipe.sh Par# > & log#-[datetime].log
-###############################################################    
-#source ~/.cshrc
+# -- NO (use bash, not csh!) --> Call in csh:  ./wispipe.sh Par# > & log#.log
+# -- Call in bash using: source ./wispipe_F140.sh Par# >& log#.log
+###############################################################
 
 
 
 ur_setup
 cd $WISPIPE/IDL/
 
-
 idl<< EOF
 .run process_IB2.pro
 process_IB2, "$1","$WISPDATA","$WISPIPE"
 .run cross_clean.pro
 .run im_clean_IB6.pro
-im_clean_IB6,"$1",/both,"$WISPDATA","$WISPIPE"
+im_clean_IB6,"$1","$WISPDATA","$WISPIPE"
 EOF
+
 
 
 ##########################################################################
@@ -36,14 +36,17 @@ cd $WISPDATA/aXe/$1/
 python IR_updatewcs.py
 ##########################################################################
 
+
 cd $WISPIPE/IDL/
 idl<< EOF
 .r tweakprep_IB1.pro
 tweakprep_IB1,"$1","$WISPDATA"
 EOF
 
+
+
 ##########################################################################
-# New code inserted for sky subtracion.
+# Python code inserted for sky subtracion.
 # The reason for which it is located between tweakprep.pro and
 # tweakprep.py is that here the SExtractor catalog are already
 # created but the wcs of grism and direct exposures are still
@@ -53,6 +56,8 @@ cd $WISPDATA/aXe/$1/
 # cp $WISPIPE/aXe/fit_multi_sky.py .
 cp $WISPIPE/PYTHON/fit_multi_sky.py .
 python fit_multi_sky.py "$WISPIPE/aXe/CONFIG/grism_master_sky_v0.5/"
+##########################################################################
+# sky subtraction - END
 ##########################################################################
 
 # -------  A  ---------
@@ -74,7 +79,6 @@ idl<< EOF
 tweakprepgrism_IB6,"$1","$WISPDATA","$WISPIPE"
 EOF
 
-
 cd $WISPDATA/aXe/$1/DATA/GRISM/
 python tweakprepgrism.py
 
@@ -85,7 +89,7 @@ new_drizprep_IB2,"$1","$WISPDATA"
 EOF
 
 # -------  B  ---------
-      
+
 ####################################################################################
  # FROM HERE FORTH, WORK ON DIRET_GRISM FOLDER (for both grism and direct exposures)
  # BEFORE THIS LINE, INSTEAD, EVERY ELABORATION SHOULD BE PERFORMED ON DIRECT and
@@ -113,7 +117,7 @@ idl<< EOF
 axeprep,"$1",/both,"$WISPDATA"
 EOF
 
-###########             # -------  C  ---------
+# -------  C  ---------
 
 ##########################################################################
 # aXe codes for stamps extraction
@@ -148,7 +152,7 @@ python WISP_grism_region_files.py G141 -c "$WISPIPE/aXe/CONFIG/"
 cd $WISPDATA/aXe/$1
 
 # -------  E  ---------
-
+ 
 ##########################################################################
 # Fake program to prevent interruptions in case of errors. If the shell
 # script finds make_pdf.sh, the error will not interrupt the reduction
@@ -195,4 +199,3 @@ cd $WISPDATA/aXe/$1
 tar -cvf "$1"_final_V6.1.tar Spectra Stamps DATA/DIRECT_GRISM/fin_F*.cat DATA/DIRECT_GRISM/*.reg DATA/DIRECT_GRISM/F*drz.fits DATA/DIRECT_GRISM/F*sci.fits DATA/DIRECT_GRISM/F*rms.fits DATA/DIRECT_GRISM/F*wht.fits DATA/DIRECT_GRISM/F*0.fits DATA/DIRECT_GRISM/JH*.fits DATA/DIRECT_GRISM/G*.fits SEX/F*full.cat Plots/*.pdf G102_DRIZZLE G141_DRIZZLE # SEX/cat_deblend_flag.cat DATA/DIRECT_GRISM/*_flag.cat DATA/UVIS/F*.fits DATA/UVIS/UVIStoIR DATA/UVIS/IRtoUVIS 
 
 gzip *.tar
-
