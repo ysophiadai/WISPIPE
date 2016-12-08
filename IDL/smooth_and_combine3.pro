@@ -120,7 +120,7 @@ pro smooth_and_combine3,field, path0
 ; in the weighting process.
 
 ; Last edit:
-; Ivano Baronchelli July 2016
+; Ivano Baronchelli November 2016
 ;ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 
 print, " "
@@ -237,15 +237,17 @@ ENDIF
 
 
 ; ***************************************************
-; CHECK J IMAGE EXISTENCE. 
+; CHECK J and H IMAGE EXISTENCE. 
 ; ***************************************************
-; IF J IS NOT COVERED, IMAGES WILL NOT BE SMOOTHED AND THE PIPELINE
-; PROCEEDS USING THE H FILTER ALONE
+; IF J or H are NOT observed,
+; IMAGES WILL NOT BE SMOOTHED AND THE PIPELINE
+; PROCEEDS USING THE ONE FILTER ALONE as a reference
 ISTHEREJ=FILE_TEST(img_110n)
+ISTHEREH=FILE_TEST(img_140n)+FILE_TEST(img_160n)
 ; ***************************************************
 
 
-IF ISTHEREJ gt 0 THEN BEGIN
+IF ISTHEREJ gt 0 and ISTHEREH gt 0 THEN BEGIN
 print, " "
 print, "J and H images will be smoothed, scaled and combined"
 print, " "
@@ -791,34 +793,38 @@ close,4
 free_lun,4
 
 
-ENDIF ;IF ISTHEREJ gt 0 THEN BEGIN
+ENDIF ELSE BEGIN  ; (IF ISTHEREJ gt 0 AND ISTHEREH gt 0 THEN BEGIN)
 
-IF ISTHEREJ eq 0 THEN BEGIN
-print, "---------------------------"
-print, " J image (F110) NOT FOUND  "
+print, "------------------------------------------------"
+print, " J (F110) and/or H (F140/F160) image NOT FOUND  "
 print, " no smoothing OR combining"
 print, " procedures will be applied"
-print, "---------------------------"
+print, " through smooth_and_combine.pro"
+print, "------------------------------------------------"
+
 ; OUT PYTHON CODE:
 openw,4, Python_out_code1
 printf, 4, "print ' '"
-printf, 4, "print '------------------------'"
+printf, 4, "print '---------------------------------------------------------'"
 printf, 4, "print 'smooth_and_combine.py'  "
-printf, 4, "print '------------------------'"
-printf, 4, "print 'IMAGES ARE NOT COMBINED'"
-printf, 4, "print 'This is possible if the '"
-printf, 4, "print 'field is covered only in'"
-printf, 4, "print 'an H filter (140 or 160)'" 
-printf, 4, "print '------------------------'"
+printf, 4, "print '---------------------------------------------------------'"
+printf, 4, "print 'WARNING: DIRECT IMAGES WILL NOT BE COMBINED'"
+printf, 4, "print 'This is correct if the field is covered only in'"
+printf, 4, "print 'the J (F110) or only in the H (140 or 160) filter.'" 
+printf, 4, "print '---------------------------------------------------------'"
 printf, 4, "print ' '"
 close,4
 free_lun,4
-ENDIF
+ENDELSE
 
-print, '-----------------------------------------------------------------------------------'
+
+
+print, '------------------------------------------------------------------------------------'
 print, 'NOTE:'
-print, 'The next following floating overflow and underflow messages do not have to be considered as errors. If you read this sentece, the program completed its computations.'
-print, '-----------------------------------------------------------------------------------'
+print, 'smooth_and_combine.pro: the possible presence of floating overflow and underflow'
+print, 'error messages right below this line, does not have to be considered as an error.'
+print, 'If you read this sentece, the program completed its computations.'
+print, '------------------------------------------------------------------------------------'
 
 if TS eq '1' then stop
 end
