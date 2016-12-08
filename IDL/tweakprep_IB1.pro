@@ -15,6 +15,8 @@
 ;#   tweakprep.py
 ;# 
 ;# Last edit, Ivano Baronchelli 2016
+;#  - This program is now able to deal with datasets different from
+;#    standard F110-G102/F140-G141
 ;#  -  Elaborations are made on grism and direct exposures in the
 ;#   GRISM and DIRECT folders and not DIRECT_GRISM anymore.
 ;#  -  in all the "imcalc" tasks, the rms image is computed using
