@@ -12,45 +12,89 @@ pro makeorder_A_IB2,field, path0
 path= path0+'/aXe/'+field+'/DATA/UVIS/'
 spawn,'mkdir '+path+'UVIS_orig_WCS'
 
-;LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
-; I.B.
-; SELECT TYPE OF DATA (both filters or only UVIS2?)
-FILT='A'
-print, "======================================================="
-readcol,path+'UVIS1.list',listUVIS1_0,format='a'
-IF n_elements(LISTUVIS1_0) eq 0 then begin
-   print, ' The previous error can be ignored if no exposures' 
-   print, ' are taken in one of the two uvis filters'
-   print, "======================================================="
-   listUVIS1_0='NONE'
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; OBS CHECK 
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+UV1_OBS='NO'
+UV2_OBS='NO'
+uvis='NO'
+UV1_list ='none'
+UV2_list ='none'
+
+TEST_UV1=file_test(path+'UVIS1.list',/zero_length) ; 1 if exists but no content
+TEST_UV1B=file_test(path+'UVIS1.list')             ; 1 if exists
+TEST_UV2=file_test(path+'UVIS2.list',/zero_length) ; 1 if exists but no content
+TEST_UV2B=file_test(path+'UVIS2.list')             ; 1 if exists
+;------------------------------------------------
+
+;   UVIS1    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_UV1 eq 0 and TEST_UV1B eq 1 then begin
+   readcol,path+'UVIS1.list',UV1_list,format=('A')
+   if strlowcase(UV1_list[0]) ne 'none' and n_elements(UV1_list[0]) gt 0 then UV1_OBS='YES'
 ENDIF
-IF listUVIS1_0[0] ne '' and  listUVIS1_0[0] ne ' ' and strupcase(listUVIS1_0[0]) ne 'NONE' then FILT='B' ;UVIS1
-;IF FILE_TEST(path+'DATA/UVIS/UVIS1_drz.fits') gt 0 then FILT='B' ;UVIS1
-;LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL
+;   UVIS2    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_UV2 eq 0 and TEST_UV2B eq 1 then begin
+   readcol,path+'UVIS2.list',UV2_list,format=('A')
+   if strlowcase(UV2_list[0]) ne 'none' and n_elements(UV2_list[0]) gt 0 then UV2_OBS='YES'
+ENDIF
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-readcol,path+'UVIS2.list',listUVIS2,format='a'
-EE=0L
-WHILE EE lt n_elements(listUVIS2) do begin
- IF listUVIS2[EE] ne '' and listUVIS2[EE] ne ' ' and strupcase(listUVIS2[EE]) ne 'NONE' THEN BEGIN
-  spawn,'cp '+path+strcompress(listUVIS2[EE],/remove_all)+' '+path+'UVIS_orig_WCS/'
- ENDIF
-EE=EE+1
-ENDWHILE
+print, 'mk_order_A'
+print, 'HHHHHHHHHHHHHHHHH'
+print, 'UV1_OBS = '+UV1_OBS
+print, 'UV2_OBS = '+UV2_OBS
+print, 'HHHHHHHHHHHHHHHHH'
 
+;-------------------------------------------------------------------
+; UVIS DATA
+IF UV1_OBS eq 'YES' or UV2_OBS eq 'YES' then uvis='YES'
+print, '=========================================================='
+print, "Set of data:"
+print, "uvis=   "+uvis
+print, '------------------------------'
+print, "uvis   --> uvis data are/aren't present"
+print, '=========================================================='
 
-IF FILT eq 'B' then begin
-readcol,path+'UVIS1.list',listUVIS1,format='a'
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+IF uvis eq 'YES' then begin
+ control=0L
+   
+ IF UV2_OBS eq 'YES' then begin
   EE=0L
-  WHILE EE lt n_elements(listUVIS1) do begin
-   IF listUVIS1[EE] ne '' and listUVIS1[EE] ne ' ' and strupcase(listUVIS1[EE]) ne 'NONE' THEN BEGIN
-    spawn,'cp '+path+strcompress(listUVIS1[EE],/remove_all)+' '+path+'UVIS_orig_WCS/'
+  WHILE EE lt n_elements(UV2_list) do begin
+   IF UV2_list[EE] ne '' and UV2_list[EE] ne ' ' and strlowcase(UV2_list[EE]) ne 'none' THEN BEGIN
+    spawn,'cp '+path+strcompress(UV2_list[EE],/remove_all)+' '+path+'UVIS_orig_WCS/'
+    control=control+1
    ENDIF
-  EE=EE+1
+   EE=EE+1
+  ENDWHILE
+ ENDIF
+
+ IF UV1_OBS eq 'YES' then begin
+  EE=0L
+  WHILE EE lt n_elements(UV1_list) do begin
+   IF UV1_list[EE] ne '' and UV1_list[EE] ne ' ' and strlowcase(UV1_list[EE]) ne 'none' THEN BEGIN
+    spawn,'cp '+path+strcompress(UV1_list[EE],/remove_all)+' '+path+'UVIS_orig_WCS/'
+    control=control+1
+   ENDIF
+   EE=EE+1
   ENDWHILE 
+ ENDIF
+
+ IF control eq 0 THEN BEGIN
+  print, 'ERROR: uvis data seems to be present but makeorder_A did not work properly!'
+ ENDIF
+
 ENDIF
 
 
-
+IF uvis eq 'NO' then begin
+print, '============================================================='
+print, 'No operations were made by makeorder_A (no uvis data present)'
+print, '============================================================='
+ENDIF
 
 
 end
