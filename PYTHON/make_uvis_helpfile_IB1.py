@@ -3,7 +3,7 @@ import os
 
 # New version of the original make_uvis_helpfile.py
 # Original Author: unknown
-# Last modifications: Ivano Baronchelli Sept. 2016
+# Last modifications: Ivano Baronchelli Nov. 2016
 
 bluefilt='none'
 redfilt='none'
@@ -23,8 +23,9 @@ if os.path.exists(rpath)==1:
     redfilt=fred[0].header['FILTER']
     fred.close()
 
-if os.path.exists(rootpath):
-    fout=open(rootpath+'NOTES_ON_UVIS_FILTERS.txt','w')
+fout=open(rootpath+'NOTES_ON_UVIS_FILTERS.txt','w')
+
+if os.path.exists(rpath) or os.path.exists(rpath):
     print >>fout, "IMPORTANT NOTE: Our naming convention has been "
     print >>fout, "chosen to name all of the UVIS files consistently "
     print >>fout, "as UVIS1 for the bluer filter and UVIS2 for the "
@@ -35,4 +36,7 @@ if os.path.exists(rootpath):
     print >>fout, "The filters used on this field are actually:"
     print >>fout, "UVIS1: %s" % (bluefilt)
     print >>fout, "UVIS2:  %s" % (redfilt)
-    fout.close()
+else:
+    print >>fout, "No UVIS observations are available/reduced for this field"
+
+fout.close()   
