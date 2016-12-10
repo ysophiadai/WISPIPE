@@ -267,7 +267,7 @@ python make_uvis_helpfile_IB1.py
          
 
 cd $WISPDATA/aXe/$1
-tar -cvf "$1"_final_V6.1.tar G102_DRIZZLE G141_DRIZZLE Spectra Stamps DATA/DIRECT_GRISM/fin_*.cat DATA/DIRECT_GRISM/i*1.cat SEX/F*full.cat DATA/DIRECT_GRISM/*.reg DATA/DIRECT_GRISM/*drz.fits DATA/DIRECT_GRISM/*sci.fits DATA/DIRECT_GRISM/*rms.fits DATA/DIRECT_GRISM/*wht.fits DATA/DIRECT_GRISM/F*0.fits DATA/DIRECT_GRISM/G*.fits Plots/*.pdf DATA/UVIS/UVIS*.fits DATA/UVIS/UVIS*.list DATA/UVIS/*.txt DATA/UVIS/UVIStoIR DATA/UVIS/IRtoUVIS
+tar -cvf "$1"_final_V6.2.tar G102_DRIZZLE G141_DRIZZLE Spectra Stamps DATA/DIRECT_GRISM/fin_*.cat DATA/DIRECT_GRISM/i*1.cat SEX/F*full.cat DATA/DIRECT_GRISM/*.reg DATA/DIRECT_GRISM/*drz.fits DATA/DIRECT_GRISM/*sci.fits DATA/DIRECT_GRISM/*rms.fits DATA/DIRECT_GRISM/*wht.fits DATA/DIRECT_GRISM/F*0.fits DATA/DIRECT_GRISM/G*.fits Plots/*.pdf DATA/UVIS/UVIS*.fits DATA/UVIS/UVIS*.list DATA/UVIS/*.txt DATA/UVIS/UVIStoIR DATA/UVIS/IRtoUVIS
 gzip *.tar
          
          
