@@ -325,12 +325,14 @@ while n lt n_elements(object) do begin
     zerotoplot=3 ; this option will plot possible contamination from zeroth orders inside the stamps, and inside the non-zero region of the spectrum only if they have a magnitude lower (=brighter) than 22.5 
        
     IF OBS_102n eq 'YES' then begin
-     ind_con=where(g102_zo ge zerotoplot) 
+     ; ind_con=where(g102_zo ge zerotoplot) 
+     ind_con=where(g102_zo ge zerotoplot and G102_wave gt 8.251e3 and G102_wave lt 1.15e4) 
      if ind_con[0] ne -1 then begin
       for q=0,n_elements(ind_con)-1  do begin
        ; oplot,replicate(G102_wave(ind_con[q]),2),[ymax,ymax/2.]/1e-18,thick=4,color=25,linestyle=2
        loadct,13,/silent
-       oplot,[G102_wave(ind_con[q]),G102_wave(ind_con[q])],[-100,ymax*2.]/1e-18,thick=10,color=215;,linestyle=2
+       ;oplot,[G102_wave(ind_con[q]),G102_wave(ind_con[q])],[-100,ymax*2.]/1e-18,thick=10,color=215;,linestyle=2
+       oplot,[G102_wave(ind_con[q]),G102_wave(ind_con[q])],[-100,ymax*2.]/1e-18,thick=10,color=212;,linestyle=2
        loadct,12,/silent
       endfor
      endif
@@ -338,11 +340,12 @@ while n lt n_elements(object) do begin
 
     IF OBS_141n eq 'YES' then begin
      ind_con=where(g141_zo ge zerotoplot)
+     ind_con=where(g141_zo ge zerotoplot and G141_wave ge 1.15e4 and  G141_wave lt 1.7e4)
      if ind_con[0] ne -1 then begin
       for q=0,n_elements(ind_con)-1  do begin
        ; oplot,replicate(G141_wave(ind_con[q]),2),[ymax,ymax/2.]/1e-18,thick=4,color=25,linestyle=2
        loadct,13,/silent
-       oplot,[G141_wave[ind_con[q]],G141_wave[ind_con[q]]],[-100,ymax*2.]/1e-18,thick=10,color=215;,linestyle=2
+       oplot,[G141_wave[ind_con[q]],G141_wave[ind_con[q]]],[-100,ymax*2.]/1e-18,thick=10,color=218;,linestyle=2
        loadct,12,/silent
       endfor
      endif 
