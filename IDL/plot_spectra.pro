@@ -321,7 +321,8 @@ while n lt n_elements(object) do begin
     IF PLOT_ZERO EQ 'YES' THEN BEGIN
 
     zerotoplot=1 ; this option will plot possible contamination from zeroth orders inside the stamps, but outside the non-zero region of the spectrum  
-    zerotoplot=2 ; this option will plot possible contamination from zeroth orders inside the stamps, and inside the non-zero region of the spectrum    
+    zerotoplot=2 ; this option will plot possible contamination from zeroth orders inside the stamps, and inside the non-zero region of the spectrum   
+    zerotoplot=3 ; this option will plot possible contamination from zeroth orders inside the stamps, and inside the non-zero region of the spectrum only if they have a magnitude lower (=brighter) than 22.5 
        
     IF OBS_102n eq 'YES' then begin
      ind_con=where(g102_zo ge zerotoplot) 
