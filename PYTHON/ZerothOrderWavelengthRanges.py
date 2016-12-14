@@ -36,6 +36,9 @@ class ZerothOrderWavelengthRanges():
      of the spectrum extraction model extension at the specified wavelength.
     2 -- If at least one zeroth order image falls within the non-zero region of the spectrum extraction
     model extension at the specified wavelength.
+    3 -- If at least one zeroth order image for an object with direct image magnitude brighter than a settable
+    threshold (default is 22.5) falls within the non-zero region of the spectrum extraction model extension
+    at the specified wavelength.
 
     If supplied a 1-dimensional array-like sequence of values specifying wavelengths (in Angstrom units),
     the class's getWavelengthZeroOrderFlags method will return a similarly sized numpy.ndarray, populated
@@ -48,7 +51,8 @@ class ZerothOrderWavelengthRanges():
                  sextractorCatalogueFilePath,
                  posAngleCorrection = 0.0,
                  regionMajorAxisPaddingFactor = 1.0,
-                 regionMinorAxisPaddingFactor = 1.0) :
+                 regionMinorAxisPaddingFactor = 1.0,
+                 brightSourceMagnitudeThreshold = 22.5) :
         """
         Constructor:
 
@@ -78,6 +82,7 @@ class ZerothOrderWavelengthRanges():
         self.drizzledStampPath = None
         self.zerothOrderRegionFilePath = zerothOrderRegionFilePath
         self.sextractorCatalogueFilePath = sextractorCatalogueFilePath
+        self.brightSourceMagnitudeThreshold = brightSourceMagnitudeThreshold
 
         # Class properties that are initialized lazily as required by the various class methods
         self.drizzledStampScienceHeader = None
@@ -89,11 +94,14 @@ class ZerothOrderWavelengthRanges():
         self.rawZerothOrderRegions = None
         self.zerothOrderRegions = None
         self.zerothOrderRegionMask = None
+        self.brightZerothOrderRegionMask = None
         self.extractionModelMask = None
 
         # Class properties that encapsulate the final computation products
         self.regionWavelengthRanges = None
         self.regionInModelWavelengthRanges = None
+        self.brightRegionWavelengthRanges = None
+        self.brightRegionInModelWavelengthRanges = None
 
         # Class properties that may be initialized upon construction if specified
         # but will fall back to effective no-op defaults otherwise.
@@ -312,9 +320,38 @@ class ZerothOrderWavelengthRanges():
         deltaWavelengthPerPixel = self.drizzledStampWavelengthParameters['CDELT1']
         return (xPixel - refPixel)*deltaWavelengthPerPixel + refWavelength
 
+    def getBrightZerothOrderRegions(self, regions) :
+        """
+        Method that filters out faint zeroth order regions according to the magnitude of the direct
+        target image that is specified in the catalogue file that is produced by the sextractor utility
+        """
+        if self.sextractorCatalogue is None :
+            self.parseSextractorCatalogue()
+
+        # operate on a copy of the passed-in region data, do not copy the instance
+        # variable since some manipulation of the region shapes and coordinates may
+        # have taken place
+        zerothOrderRegionsCopy = copy.deepcopy(regions)
+
+        for regionIndex, region in enumerate(zerothOrderRegionsCopy) :
+            # Extract the object ID for the zeroth order being processed from the region file annotation
+            if 'circle' not in region.name and 'ellipse' not in region.name :
+                continue
+            zeroOrderId = int(region.attr[1]['text'].split()[0])
+            # Attempt to extract the magnitude for the object ID from the parsed sextractor catalogue
+            zeroOrderMagnitudeData = self.sextractorCatalogue[self.sextractorCatalogue['NUMBER'] == zeroOrderId]['MAG']
+            if len(zeroOrderMagnitudeData) > 0 :
+                zeroOrderMagnitude = zeroOrderMagnitudeData.iloc[0]
+                if zeroOrderMagnitude > self.brightSourceMagnitudeThreshold :
+                    # the object is fainter than the threshold magnitude - discard it
+                    del zerothOrderRegionsCopy[regionIndex]
+
+        return zerothOrderRegionsCopy
+
+
     def computeRegionWavelengthRanges(self) :
         """
-        Method which actually computes the ranges of wavelengths that intersect zeroth order image regions.
+        Method which initiates computation of the ranges of wavelengths that intersect zeroth order image regions.
         """
         # Ensure that the drizzled stamp file path has been specified
         if self.drizzledStampPath is None :
@@ -332,6 +369,21 @@ class ZerothOrderWavelengthRanges():
 
         # ensure that the regions are mapped into the image coordinates of the drizzled stamp
         imageCoordRegionList = zerothOrderRegionsCopy.as_imagecoord(self.drizzledStampScienceHeader)
+
+        # create a second copy containing only sources with magnitudes brighter than 22.5
+        # TODO: make magnitude threshold a parameters
+        brightImageCoordRegionList = self.getBrightZerothOrderRegions(imageCoordRegionList)
+
+        #intentionally ignore model mask returned in first call, it is identical to that returned by the second call
+        (brightRegionMask, _, self.brightRegionWavelengthRanges, self.brightRegionInModelWavelengthRanges) = self.doComputeRegionWavelengthRanges(brightImageCoordRegionList)
+        (regionMask, modelMask, self.regionWavelengthRanges, self.regionInModelWavelengthRanges) = self.doComputeRegionWavelengthRanges(imageCoordRegionList)
+
+        return (regionMask, brightRegionMask, modelMask)
+
+    def doComputeRegionWavelengthRanges(self, imageCoordRegionList) :
+        """
+        Method which actually computes the ranges of wavelengths that intersect zeroth order image regions.
+        """
 
         # create a 2d pixel mask for the zeroth order regions that intersect the drizzled stamp boundaries
         stampFitsFile = astrofits.open(self.drizzledStampPath)
@@ -364,15 +416,15 @@ class ZerothOrderWavelengthRanges():
         groupedRegionInModelWavelengthIndices = [list(group) for _,group in itertools.groupby(regionInModelWavelengthIndices,key=lambda n,c=itertools.count():n-next(c))]
 
         # isolate the first and last pixels from each range and convert to wavelengths
-        self.regionWavelengthRanges = [[self.mapStampXPixelToWavelength(indexRange[0]),
-                                        self.mapStampXPixelToWavelength(indexRange[-1])]
-                                       for indexRange in groupedRegionWavelengthIndices]
+        regionWavelengthRanges = [[self.mapStampXPixelToWavelength(indexRange[0]),
+                                   self.mapStampXPixelToWavelength(indexRange[-1])]
+                                  for indexRange in groupedRegionWavelengthIndices]
 
-        self.regionInModelWavelengthRanges = [[self.mapStampXPixelToWavelength(indexRange[0]),
-                                               self.mapStampXPixelToWavelength(indexRange[-1])]
-                                              for indexRange in groupedRegionInModelWavelengthIndices]
+        regionInModelWavelengthRanges = [[self.mapStampXPixelToWavelength(indexRange[0]),
+                                          self.mapStampXPixelToWavelength(indexRange[-1])]
+                                         for indexRange in groupedRegionInModelWavelengthIndices]
 
-        return (regionMask, modelMask)
+        return (regionMask, modelMask, regionWavelengthRanges, regionInModelWavelengthRanges)
 
     def getRegionWavelengthRanges(self) :
         """
@@ -382,9 +434,9 @@ class ZerothOrderWavelengthRanges():
         lists the wavelength ranges for zeroth orders that intersect the non-zero pixels in the extraction
         model for the target object.
         """
-        if self.regionWavelengthRanges is None or self.regionInModelWavelengthRanges is None :
-            self.zerothOrderRegionMask, self.extractionModelMask = self.computeRegionWavelengthRanges()
-        return (self.regionWavelengthRanges, self.regionInModelWavelengthRanges)
+        if self.regionWavelengthRanges is None or self.brightRegionWavelengthRanges is None or self.regionInModelWavelengthRanges is None :
+            self.zerothOrderRegionMask, self.brightZerothOrderRegionMask, self.extractionModelMask = self.computeRegionWavelengthRanges()
+        return (self.regionWavelengthRanges, self.brightRegionWavelengthRanges, self.regionInModelWavelengthRanges)
 
     def getWavelengthZeroOrderFlag(self, wavelength) :
         """
@@ -398,7 +450,7 @@ class ZerothOrderWavelengthRanges():
         model extension at the specified wavelength.
         """
         flag = 0
-        regionWavelengthRanges, regionInModelWavelengthRanges = self.getRegionWavelengthRanges()
+        regionWavelengthRanges, brightRegionWavelengthRanges, regionInModelWavelengthRanges = self.getRegionWavelengthRanges()
         # test whether wavelength corresponds to any zeroth order in the stamp bounds
         for wavelengthRange in regionWavelengthRanges :
             if wavelength >= wavelengthRange[0] and wavelength <= wavelengthRange[1] :
@@ -407,6 +459,11 @@ class ZerothOrderWavelengthRanges():
         # test whether wavelength corresponds to any zeroth order within the non-zero range of the
         # extraction model
         for wavelengthRange in regionInModelWavelengthRanges :
+            if wavelength >= wavelengthRange[0] and wavelength <= wavelengthRange[1] :
+                flag += 1
+                break
+        # test whether the direct image magnitude of the source is brighter than a threshold magnitude
+        for wavelengthRange in brightRegionWavelengthRanges :
             if wavelength >= wavelengthRange[0] and wavelength <= wavelengthRange[1] :
                 flag += 1
                 break
@@ -423,6 +480,9 @@ class ZerothOrderWavelengthRanges():
         of the spectrum extraction model extension at the specified wavelength.
         2 -- If at least one zeroth order image falls within the non-zero region of the spectrum extraction
         model extension at the specified wavelength.
+        3 -- If at least one zeroth order image for an object with direct image magnitude brighter than a settable
+        threshold (default is 22.5) falls within the non-zero region of the spectrum extraction model extension
+        at the specified wavelength.
         """
         return np.array([ self.getWavelengthZeroOrderFlag(wavelength) for wavelength in wavelengths ])
 
@@ -441,6 +501,7 @@ class ZerothOrderWavelengthRanges():
         self.drizzledStampWavelengthParameters = None
         self.zerothOrderRegions = None
         self.zerothOrderRegionMask = None
+        self.brightZerothOrderRegionMask = None
         self.extractionModelMask = None
         self.regionWavelengthRanges = None
         self.regionInModelWavelengthRanges = None
@@ -449,13 +510,13 @@ class ZerothOrderWavelengthRanges():
         """
         Utility method to plot the region and model masks as a useful sanity check.
         """
-        if self.zerothOrderRegionMask is None or self.extractionModelMask is None :
-            self.zerothOrderRegionMask, self.extractionModelMask = self.computeRegionWavelengthRanges()
+        if self.zerothOrderRegionMask is None or self.brightZerothOrderRegionMask is None or self.extractionModelMask is None :
+            self.zerothOrderRegionMask, self.brightZerothOrderRegionMask, self.extractionModelMask = self.computeRegionWavelengthRanges()
 
-        figure = pyplot.figure(figsize=(10, 8))
+        figure = pyplot.figure(figsize=(10, 12))
         pyplot.ylabel('Pixels')
         pyplot.xlabel('Pixels')
-        axes = pyplot.subplot(2,1,1)
+        axes = pyplot.subplot(3,1,1)
         pyplot.ylim([0, self.zerothOrderRegionMask.shape[0]])
         pyplot.xlim([0, self.zerothOrderRegionMask.shape[1]])
         pyplot.title('Zeroth Order Region Map', y=1.4)
@@ -465,7 +526,20 @@ class ZerothOrderWavelengthRanges():
         pyplot.xlim(self.mapStampXPixelToWavelength(0), self.mapStampXPixelToWavelength(self.zerothOrderRegionMask.shape[1]))
         pyplot.xlabel(r'Wavelength $\AA$')
 
-        axes = pyplot.subplot(2,1,2)
+        figure = pyplot.figure(figsize=(10, 12))
+        pyplot.ylabel('Pixels')
+        pyplot.xlabel('Pixels')
+        axes = pyplot.subplot(3,1,1)
+        pyplot.ylim([0, self.brightZerothOrderRegionMask.shape[0]])
+        pyplot.xlim([0, self.brightZerothOrderRegionMask.shape[1]])
+        pyplot.title('Bright (m < {}) Zeroth Order Region Map'.format(self.brightSourceMagnitudeThreshold), y=1.4)
+        pyplot.imshow(self.brightZerothOrderRegionMask, cmap='hot')
+        axes.set_aspect('auto')
+        wavelengthAxes = axes.twiny()
+        pyplot.xlim(self.mapStampXPixelToWavelength(0), self.mapStampXPixelToWavelength(self.brightZerothOrderRegionMask.shape[1]))
+        pyplot.xlabel(r'Wavelength $\AA$')
+
+        axes = pyplot.subplot(3,1,3)
         pyplot.ylabel('Pixels')
         pyplot.xlabel('Pixels')
         pyplot.ylim([0, self.extractionModelMask.shape[0]])
