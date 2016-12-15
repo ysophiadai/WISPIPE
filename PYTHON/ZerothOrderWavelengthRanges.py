@@ -52,7 +52,8 @@ class ZerothOrderWavelengthRanges():
                  posAngleCorrection = 0.0,
                  regionMajorAxisPaddingFactor = 1.0,
                  regionMinorAxisPaddingFactor = 1.0,
-                 brightSourceMagnitudeThreshold = 22.5) :
+                 brightSourceMagnitudeThreshold = 22.5,
+                 printVerbose = False) :
         """
         Constructor:
 
@@ -77,12 +78,18 @@ class ZerothOrderWavelengthRanges():
         regionMinorAxisPaddingFactor -- Optional multiplicative factor intended to increase the minor
         axis length of an elliptical region in order to provide a margin of saftey if desired (default: 1).
 
+        brightSourceMagnitudeThreshold -- Optional magnitude threshold that determines whether a zeroth
+        order within the non-zero model extraction region should be flagged as bright (default = 22.5)
+
+        printVerbose -- If True (the default is False) additional information about execution is printed
+        to the terminal.
         """
         # Class properties that are initialized upon construction
         self.drizzledStampPath = None
         self.zerothOrderRegionFilePath = zerothOrderRegionFilePath
         self.sextractorCatalogueFilePath = sextractorCatalogueFilePath
         self.brightSourceMagnitudeThreshold = brightSourceMagnitudeThreshold
+        self.verbose = printVerbose
 
         # Class properties that are initialized lazily as required by the various class methods
         self.drizzledStampScienceHeader = None
@@ -328,25 +335,41 @@ class ZerothOrderWavelengthRanges():
         if self.sextractorCatalogue is None :
             self.parseSextractorCatalogue()
 
-        # operate on a copy of the passed-in region data, do not copy the instance
-        # variable since some manipulation of the region shapes and coordinates may
-        # have taken place
-        zerothOrderRegionsCopy = copy.deepcopy(regions)
+        # create a new region list to populate with only bright regions. Removing faint
+        # regions from a copy seems not to work.
+        brightRegions = pyregion.ShapeList([])
 
-        for regionIndex, region in enumerate(zerothOrderRegionsCopy) :
+        # read from the passed-in region data, do not read the the original regions instance
+        # variable since some manipulation of the region shapes and coordinates may
+        # have taken place.
+        for regionIndex, region in enumerate(regions) :
             # Extract the object ID for the zeroth order being processed from the region file annotation
             if 'circle' not in region.name and 'ellipse' not in region.name :
                 continue
+
             zeroOrderId = int(region.attr[1]['text'].split()[0])
+            textMagnitude = region.attr[1]['text'].split()[1][1:-1]
             # Attempt to extract the magnitude for the object ID from the parsed sextractor catalogue
             zeroOrderMagnitudeData = self.sextractorCatalogue[self.sextractorCatalogue['NUMBER'] == zeroOrderId]['MAG']
+            zeroOrderMagnitude = None
             if len(zeroOrderMagnitudeData) > 0 :
+                if self.verbose :
+                    print ('ZerothOrderWavelengthRanges::getBrightZerothOrderRegions: Using catalogue magnitude.')
                 zeroOrderMagnitude = zeroOrderMagnitudeData.iloc[0]
-                if zeroOrderMagnitude > self.brightSourceMagnitudeThreshold :
-                    # the object is fainter than the threshold magnitude - discard it
-                    del zerothOrderRegionsCopy[regionIndex]
+            elif len(textMagnitude) > 0 :
+                if self.verbose :
+                    print ('ZerothOrderWavelengthRanges::getBrightZerothOrderRegions: Using text magnitude.')
+                zeroOrderMagnitude = float(textMagnitude)
+            else :
+                if self.verbose :
+                    print ('ZerothOrderWavelengthRanges::getBrightZerothOrderRegions: Could not determine magnitude')
+                continue
+            if zeroOrderMagnitude < self.brightSourceMagnitudeThreshold :
+                if self.verbose :
+                    print ('ZerothOrderWavelengthRanges::getBrightZerothOrderRegions: Bright zeroth order found:\n\tID {}\n\t Mag. {}\n\n'.format(zeroOrderId, zeroOrderMagnitude))
+                brightRegions.append(copy.deepcopy(region))
 
-        return zerothOrderRegionsCopy
+        return brightRegions
 
 
     def computeRegionWavelengthRanges(self) :
@@ -463,10 +486,11 @@ class ZerothOrderWavelengthRanges():
                 flag += 1
                 break
         # test whether the direct image magnitude of the source is brighter than a threshold magnitude
-        for wavelengthRange in brightRegionWavelengthRanges :
-            if wavelength >= wavelengthRange[0] and wavelength <= wavelengthRange[1] :
-                flag += 1
-                break
+        if flag > 1 :
+            for wavelengthRange in brightRegionWavelengthRanges :
+                if wavelength >= wavelengthRange[0] and wavelength <= wavelengthRange[1] :
+                    flag += 1
+                    break
         return flag
 
     def getWavelengthZerothOrderFlags(self, wavelengths) :
@@ -529,7 +553,7 @@ class ZerothOrderWavelengthRanges():
         figure = pyplot.figure(figsize=(10, 12))
         pyplot.ylabel('Pixels')
         pyplot.xlabel('Pixels')
-        axes = pyplot.subplot(3,1,1)
+        axes = pyplot.subplot(3,1,2)
         pyplot.ylim([0, self.brightZerothOrderRegionMask.shape[0]])
         pyplot.xlim([0, self.brightZerothOrderRegionMask.shape[1]])
         pyplot.title('Bright (m < {}) Zeroth Order Region Map'.format(self.brightSourceMagnitudeThreshold), y=1.4)
