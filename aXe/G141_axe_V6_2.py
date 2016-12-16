@@ -67,46 +67,6 @@ def check_data_backup():
 	raise Exception(estring)
 
 
-   
-
-    #***************************************************************************************** 
-    # aXe -- NO BACK -- NO DRIZZLE :
-    #*****************************************************************************************
-def aXe_noback_nodrizzle():
-
-    # Running axeprep:
-# =====================================
-
-    print """
--->axeprep inlist="GRISM_axeprep.lis" configs=conf_file
-             backgr="NO" mfwhm="0.0 norm="NO" histogram="NO"
-    """
-    time.sleep(5)
-    iraf.axeprep(inlist=GRISM+"_axeprep.lis", configs=conf_file,
-		  backgr="YES", backims="F110_back.fits", mfwhm="0.0",
-		  norm="NO")
-
-
-    # Running axecore: 
-    # ==================================
-    print """
--->axecore inlist="GRISM_axesing.lis" configs=conf_file 
-           back="YES" extrfwhm=9.0 backfwhm=3.0 drzfwhm=4.0 slitless_geom="YES"
-           orient="YES" exclude="NO" lambda_mark=1020.0 cont_model="gauss"
-           model_scale=3.0 inter_type="linear" lambda_psf=980.0 np=30 interp=1
-           smooth_length=0 smooth_fwhm=0.0 model_scale=5.0 inter_type="linear"
-           spectr="YES" weights="NO" sampling="drizzle" adj_sens="YES"
-    """
-    time.sleep(5)
-    iraf.axecore(inlist=GRISM+"_axeprep.lis", configs=conf_file , back="YES",
-            extrfwhm=9.0, backfwhm=3.0, drzfwhm=4.0,
-	    slitless_geom="YES", orient="NO", exclude="NO", lambda_mark=1410.0,
-	    cont_model="gauss", model_scale=2.0, inter_type="linear",
-	    lambda_psf=1392.0, np=30, interp=1, smooth_length=0, smooth_fwhm=0.0,
-            spectr="YES",  adj_sens="YES", weights="YES", sampling="drizzle")
-    
-#            extrfwhm=2.0, backfwhm=4.0, drzfwhm=2.0,
-
 
 
     #***************************************************************************************** 
@@ -119,7 +79,7 @@ def aXe_noback_drizzle_f140():
 
     print """
 -->axeprep inlist="GRISM_axeprep.lis" configs=conf_file
-             backgr="YES" mfwhm="2.0" norm="NO" histogram="NO"
+             backgr="NO" mfwhm="1.5" norm="NO" histogram="NO"
     """
     time.sleep(5)
 #    iraf.axeprep(inlist=GRISM+"_axeprep.lis", configs="WFC3.IR."+GRISM+".V2.0.conf",
@@ -134,8 +94,9 @@ def aXe_noback_drizzle_f140():
     owd = os.getcwd()
     os.chdir('./DATA/DIRECT_GRISM/')
     
-    iraf.fixpix(images="@F140_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+"aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF")
-    iraf.combine(input="@F140_clean.list//[1]%'",output="F140.fits",combine="median")
+    if os.path.isfile("F140W_drz.fits") and not os.path.isfile("F140.fits"):
+        iraf.fixpix(images="@F140_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+"aXe/CONFIG/bp_mask_v6.pl",linterp=1000,cinterp="INDEF")
+        iraf.combine(input="@F140_clean.list//[1]%'",output="F140.fits",combine="median")
     
 ############################################################
 # This part is now done in tweakprepgrism.pro.
@@ -199,7 +160,7 @@ def aXe_noback_drizzle_f140():
                     back="NO", makespc="YES", opt_extr="YES",adj_sens="YES")
 
  
-  #***************************************************************************************** 
+    #***************************************************************************************** 
     # aXe -- NOBACK -- DRIZZLE :
     #*****************************************************************************************
 def aXe_noback_drizzle_f160():
@@ -224,8 +185,9 @@ def aXe_noback_drizzle_f160():
     owd = os.getcwd()
     os.chdir('./DATA/DIRECT_GRISM/')
 
-    iraf.fixpix(images="@F160_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+'aXe/CONFIG/bp_mask_v6.pl',linterp=1000,cinterp="INDEF")
-    iraf.combine(input="@F160_clean.list//[1]%'",output="F160.fits",combine="median")
+    if os.path.isfile("F160W_drz.fits") and not os.path.isfile("F160.fits"):
+        iraf.fixpix(images="@F160_clean.list//[1]%'",masks=os.path.expandvars('$WISPIPE')+'aXe/CONFIG/bp_mask_v6.pl',linterp=1000,cinterp="INDEF")
+        iraf.combine(input="@F160_clean.list//[1]%'",output="F160.fits",combine="median")
     
 ############################################################
 # This part is now done in tweakprepgrism.pro.
@@ -290,37 +252,42 @@ def aXe_noback_drizzle_f160():
                     adj_sens="YES")
 
  
-  #***************************************************************************************** 
+    #***************************************************************************************** 
     #            aXe -- MAIN PROGRAMME
     #*****************************************************************************************
 def main():
 
-    # set the environmental variable
-    set_aXe_environment()
+    #======================================================
+    # Check direct filter to decide if proceed or not
+    #======================================================
+    if os.path.isfile("DATA/DIRECT_GRISM/G141_drz.fits"):
+    
+        # set the environmental variable
+        set_aXe_environment()
+    
+        # Running iolprep:
+        owd = os.getcwd()
+        #change dir to data path
+        os.chdir('./DATA/DIRECT_GRISM/')
+        
+        if os.path.isfile("F140W_drz.fits"):
+            print 'Extracting with F140W filter ............................' 
+            iraf.iolprep(mdrizzle_image="F140W_drz.fits",input_cat="cat_F140.cat",useMdriz=False)
+            os.chdir(owd) 
+            aXe_noback_drizzle_f140()
+        else:
+            print 'Extracting with F160W filter ............................' 
+            iraf.iolprep(mdrizzle_image="F160W_drz.fits",input_cat="cat_F160.cat",useMdriz=False)
+            os.chdir(owd) 
+            aXe_noback_drizzle_f160()
 
-    # Running iolprep:
-    owd = os.getcwd()
-    #change dir to data path
-    os.chdir('./DATA/DIRECT_GRISM/')
-
-    f = open('F160.list', "r")
-    text = f.read()
-    print text[0:4]
-
-    if text[0:4] == 'none': 
-        print 'Extracting with F140W filter ............................' 
-        #run task from data directory
-        iraf.iolprep(mdrizzle_image="F140W_drz.fits",input_cat="cat_F140.cat",useMdriz=False)
-        #change dir back to original working directory (owd)
-        os.chdir(owd) 
-        aXe_noback_drizzle_f140()
     else:
-        print 'Extracting with F160W filter ............................'
-        #run task from data directory
-        iraf.iolprep(mdrizzle_image="F160W_drz.fits",input_cat="cat_F160.cat",useMdriz=False)
-        #change dir back to original working directory (owd)
-        os.chdir(owd) 
-        aXe_noback_drizzle_f160()
+        print "==========================================="
+        print "Field not covered by observations in grism "
+        print " G141 or G141 astrodrizzled image not found"
+        print "--- No operations executed by G141_axe! ---"
+        print "==========================================="
 
 main()
+
 

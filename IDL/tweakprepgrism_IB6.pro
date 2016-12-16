@@ -36,120 +36,231 @@ path = expand_path(path0)+'/aXe/'+field+'/'
 ;path = '/Volumes/Kudo/DATA/WISPS/aXe/Par288-full/'
 ;tweakprepgrism,'Par288-full','/Volumes/Kudo/DATA/WISPS'
 
-readcol,path+'DATA/DIRECT_GRISM/F110_clean.list',f110_list,format=('A')
-readcol,path+'DATA/DIRECT_GRISM/G102_clean.list',g102_list,format=('A')
-   visit110 = strmid(f110_list,4,2)
-   visit102 = strmid(g102_list,4,2)
 
-readcol,path+'DATA/DIRECT_GRISM/F160_clean.list',f160_list,format=('A')
-readcol,path+'DATA/DIRECT_GRISM/G141_clean.list',g141_list,format=('A')
-   visit141 = strmid(g141_list,4,2)
 
+
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; OBS CHECK 
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+print, 'tweakprepgrism'
+J_OBS='NO' ; NO or YES observations in the F102 band
+H_OBS='NO' ; NO, F140 or F160
+G102_OBS='NO'
+G141_OBS='NO'
+f110_list='none'
+f140_list='none'
+f160_list='none'
+g102_list='none'
+g141_list='none'
+;------------------------------------------------
+; DIRECT ----
+TEST_J=file_test(path+'DATA/DIRECT/F110_clean.list',/zero_length) ; 1 if exists but no content
+TEST_JB=file_test(path+'DATA/DIRECT/F110_clean.list')              ; 1 if exists
+TEST_H1=file_test(path+'DATA/DIRECT/F140_clean.list',/zero_length) ; 1 if exists but no content
+TEST_H1B=file_test(path+'DATA/DIRECT/F140_clean.list')             ; 1 if exists
+TEST_H2=file_test(path+'DATA/DIRECT/F160_clean.list',/zero_length) ; 1 if exists but no content
+TEST_H2B=file_test(path+'DATA/DIRECT/F160_clean.list')             ; 1 if exists
+; GRISMS ----
+TEST_G102=file_test(path+'DATA/GRISM/G102_clean.list',/zero_length) ; 1 if exists but no content
+TEST_G102B=file_test(path+'DATA/GRISM/G102_clean.list')              ; 1 if exists
+TEST_G141=file_test(path+'DATA/GRISM/G141_clean.list',/zero_length) ; 1 if exists but no content
+TEST_G141B=file_test(path+'DATA/GRISM/G141_clean.list')              ; 1 if exists
+;------------------------------------------------
+;     J      +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_J eq 0 and TEST_JB eq 1 then begin
+   readcol,path+'DATA/DIRECT/F110_clean.list',f110_list,format=('A')
+   if strlowcase(f110_list[0]) ne 'none' and n_elements(f110_list[0]) gt 0 then J_OBS='YES'
+ENDIF
+;     H      F140 / F160 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_H1 eq 0 and TEST_H1B eq 1 then begin
+   readcol,path+'DATA/DIRECT/F140_clean.list',f140_list,format=('A')
+   if strlowcase(f140_list[0]) ne 'none' and n_elements(f140_list[0]) gt 0 then H_OBS='F140'
+ENDIF
+IF TEST_H2 eq 0 and TEST_H2B eq 1 then begin
+   readcol,path+'DATA/DIRECT/F160_clean.list',f160_list,format=('A')
+   if strlowcase(f160_list[0]) ne 'none' and n_elements(f160_list[0]) gt 0 then H_OBS='F160'
+ENDIF
+;    G102    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_G102 eq 0 and TEST_G102B eq 1 then begin
+   readcol,path+'DATA/GRISM/G102_clean.list',g102_list,format=('A')
+   if strlowcase(g102_list[0]) ne 'none' and n_elements(g102_list[0]) gt 0 then G102_OBS='YES'
+ENDIF
+;    G141    +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+IF TEST_G141 eq 0 and TEST_G141B eq 1 then begin
+   readcol,path+'DATA/GRISM/G141_clean.list',g141_list,format=('A')
+   if strlowcase(g141_list[0]) ne 'none' and n_elements(g141_list[0]) gt 0 then G141_OBS='YES'
+ENDIF
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+print, 'HHHHHHHHHHHHHHHHH'
+print, TEST_J,TEST_JB
+print, TEST_H1,TEST_H1B
+print, TEST_H2,TEST_H2B
+print, 'J_OBS = '+J_OBS
+print, 'H_OBS = '+H_OBS
+print, 'G102_OBS = '+G102_OBS
+print, 'G141_OBS = '+G141_OBS
+print, 'HHHHHHHHHHHHHHHHH'
+
+
+;readcol,path+'DATA/DIRECT_GRISM/F110_clean.list',f110_list,format=('A')
+;readcol,path+'DATA/DIRECT_GRISM/G102_clean.list',g102_list,format=('A')
+;readcol,path+'DATA/DIRECT_GRISM/F160_clean.list',f160_list,format=('A')
+;readcol,path+'DATA/DIRECT_GRISM/G141_clean.list',g141_list,format=('A')
+
+;if f160_list[0] ne 'none' then begin
+; visit160 = strmid(f160_list,4,2)
+;endif
+;
+;if f160_list[0] eq 'none' then begin
+; readcol,path+'DATA/DIRECT_GRISM/F140_clean.list',f140_list,format=('A')
+; visit140 = strmid(f140_list,4,2)
+;endif
+
+
+IF J_OBS eq 'YES' THEN  visit110 = strmid(f110_list,4,2)
+IF H_OBS eq 'F140' THEN visit140 = strmid(f140_list,4,2)
+IF H_OBS eq 'F160' THEN visit160 = strmid(f160_list,4,2)
+
+IF G102_OBS eq 'YES' THEN visit102 = strmid(g102_list,4,2)
+IF G141_OBS eq 'YES' THEN visit141 = strmid(g141_list,4,2)
+
+
+;------------------------------------------------------------------------------------------------
 readcol,path+'DATA/GRISM/img_size.txt', NXpixels_tot,NYpixels_tot,RA_ref,dec_ref,format='A,A,A,A'
+; These quantities are read as strings and used as strings
+; DO NOT CONVERT TO LONG OR FLOAT!   
 ;NXpixels_tot=long(NXpixels_tot)
 ;NYpixels_tot=long(NYpixels_tot)
 ;RA_ref=double(RA_ref)
 ;dec_ref=double(dec_ref)
+;------------------------------------------------------------------------------------------------
 
-if  f160_list[0] ne 'none' then begin
-   visit160 = strmid(f160_list,4,2)
-endif
-
-if  f160_list[0] eq 'none' then begin
-   readcol,path+'DATA/DIRECT_GRISM/F140_clean.list',f140_list,format=('A')
-   visit140 = strmid(f140_list,4,2)
-endif
-
-openw,1, path+'DATA/GRISM/direct_grism_shift.list',width=1000
-
-;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-; Change Ivano
-;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-; readcol,path+'DATA/DIRECT/shift_pos_drz_clean.txt',file,deltax,deltay,deltarot,f='a,f,f,f'
-; ERROR:
-; In tweaksex, the "clean_crclean" wcs solutions are adopted for the 
-; "clean" images. Here we should do the same for the grisms. Right
-; version here below
 readcol,path+'DATA/DIRECT/shift_pos_drz_crclean.txt',file_cr_cl,deltax,deltay,deltarot,f='a,f,f,f'
 file_cl=strmid(file_cr_cl,0,19)+'.fits'
 help, file_cl[0],/str
-;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
-for i=0,n_elements(visit102)-1 do begin
-    m=0
-    for j = 0, n_elements(visit110)-1 do begin
-       if m eq 1 then goto,eend
-       if visit102[i] eq visit110[j] then begin
-          mm = where(file_cl eq f110_list[j])
-          printf,1,g102_list[i],'  ',strmid(f110_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
-        m = 1
-;          spawn,'cp '+path+'DATA/DIRECT/'+strmid(f110_list[j],0,19)+'_hlet.fits '+path+'DATA/GRISM/'+strmid(g102_list[i],0,19)+'_hlet.fits'
-       endif
-    endfor
-    eend:
+
+;Create direct-grism exposure associations
+;*****************************************
+
+openw,1, path+'DATA/GRISM/direct_grism_shift.list',width=1000
+
+; GRISM 102 ==============================
+
+IF G102_OBS eq 'YES' THEN BEGIN
+ for i=0,n_elements(visit102)-1 do begin
+  m=0
+  j=0
+
+  IF J_OBS eq 'YES' THEN BEGIN  
+   while j lt n_elements(visit110) and m ne 1 do begin
+    if visit102[i] eq visit110[j] then begin
+     mm = where(file_cl eq f110_list[j])
+     printf,1,g102_list[i],'  ',strmid(f110_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
+     m = 1
+    endif
+    j=j+1
+   endwhile
+   if m eq 0 and j eq n_elements(visit110) then print,'WARNING: ',g102_list[i],' has no associated direct images and will not be tweakreged'
+  ENDIF
+  
+  IF J_OBS ne 'YES' AND H_OBS eq 'F140' THEN BEGIN
+   while j lt n_elements(visit140) and m ne 1 do begin
+    if visit102[i] eq visit140[j] then begin
+     mm = where(file_cl eq f140_list[j])
+     printf,1,g102_list[i],'  ',strmid(f140_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
+     m = 1
+    endif
+    j=j+1
+   endwhile  
+   if m eq 0 and j eq n_elements(visit140) then print,'WARNING: ',g102_list[i],' has no associated direct images and will not be tweakreged'
+  ENDIF
+  
+  IF J_OBS ne 'YES' AND H_OBS eq 'F160' THEN BEGIN
+   while j lt n_elements(visit160) and m ne 1 do begin
+    if visit102[i] eq visit160[j] then begin
+     mm = where(file_cl eq f160_list[j])
+     printf,1,g102_list[i],'  ',strmid(f160_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
+     m = 1
+    endif
+    j=j+1
+   endwhile 
+   if m eq 0 and j eq n_elements(visit160) then print,'WARNING: ',g102_list[i],' has no associated images and will not be tweakreged' 
+  ENDIF
+
  endfor
- 
+ENDIF
+
+; GRISM 141 ==============================
+
+IF G141_OBS eq 'YES' THEN BEGIN
  for i=0,n_elements(visit141)-1 do begin
-    m = 0
-    if  f160_list[0] ne 'none' then begin
-    for j = 0, n_elements(visit160)-1 do begin
-       if m eq 1 then goto,eend2
-       if visit141[i] eq visit160[j] then begin
-          mm = where(file_cl eq f160_list[j])
-          printf,1,g141_list[i],'  ',strmid(f160_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
-         m = 1
-;          spawn,'cp '+path+'DATA/DIRECT/'+strmid(f160_list[j],0,19)+'_hlet.fits '+path+'DATA/GRISM/'+strmid(g141_list[i],0,19)+'_hlet.fits'
-       endif
-      endfor
-    endif else begin
-    for j = 0, n_elements(visit140)-1 do begin
-       if visit141[i] eq visit140[j] then begin
-          mm = where(file_cl eq f140_list[j])
-          printf,1,g141_list[i],'  ',strmid(f140_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
-          m = 1
-;          spawn,'cp '+path+'DATA/DIRECT/'+strmid(f140_list[j],0,19)+'_hlet.fits '+path+'DATA/GRISM/'+strmid(g141_list[i],0,19)+'_hlet.fits'
-          goto,eend2
-       endif
-      endfor
-   endelse
-    eend2:
+  m=0
+  j=0
+
+  IF H_OBS eq 'F160' THEN BEGIN
+   while j lt n_elements(visit160) and m ne 1 do begin
+    if visit141[i] eq visit160[j] then begin
+     mm = where(file_cl eq f160_list[j])
+     printf,1,g141_list[i],'  ',strmid(f160_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
+     m = 1
+    endif
+    j=j+1
+   endwhile
+   if m eq 0 and j eq n_elements(visit160) then print,'WARNING: ',g141_list[i],' has no associated direct images and will not be tweakreged'
+  ENDIF
+
+  IF H_OBS eq 'F140' THEN BEGIN
+   while j lt n_elements(visit140) and m ne 1 do begin
+    if visit141[i] eq visit140[j] then begin
+     mm = where(file_cl eq f140_list[j])
+     printf,1,g141_list[i],'  ',strmid(f140_list[j],0,19)+'_hlet.fits     ',strtrim(deltax[mm[0]],2)+'   '+strtrim(deltay[mm[0]],2)+'   '+strtrim(deltarot[mm[0]],2)
+     m = 1 
+    endif
+    j=j+1
+   endwhile
+   if m eq 0 and j eq n_elements(visit140) then print,'WARNING: ',g141_list[i],' has no associated direct images and will not be tweakreged'
+  ENDIF
+
  endfor
+ENDIF
+; GRISM 141 END ==============================
 
- close,1
- free_lun,1
+close,1
+free_lun,1
 
-; to generate the python script to get
-; grism_crcleaned.fits files, then
+
+
+; to generate the python script to get grism_crcleaned.fits files, then
 ; apply shift from the direct images
 ; NOTE: This method is not used anymore. I.B.
 readcol,path+'DATA/GRISM/direct_grism_shift.list',grism_list,direct_list,shiftx,shifty,format=('A,A,f,f')
- 
-;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
-; I.B modification --- NEW METHOD ----
-;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+
+
+;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
 ; SHIFT x and SHIFT Y represent delta RA and delta DEC in units of [pixels].
 ; The updatewcs_with_shift function wants its input shifts in [deg]
 ; units. In the WRONG documentation, they report instead that the
 ; input units should be in [pixels].
- DRA      = dblarr(n_elements(grism_list))
- Ddec     = dblarr(n_elements(grism_list))
- DeltaX   = dblarr(n_elements(grism_list))
- DeltaY   = dblarr(n_elements(grism_list))
- DELTA_RA = dblarr(n_elements(grism_list))
- DELTA_DEC= dblarr(n_elements(grism_list))
+;CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC
+DRA      = dblarr(n_elements(grism_list))
+Ddec     = dblarr(n_elements(grism_list))
+DeltaX   = dblarr(n_elements(grism_list))
+DeltaY   = dblarr(n_elements(grism_list))
+DELTA_RA = dblarr(n_elements(grism_list))
+DELTA_DEC= dblarr(n_elements(grism_list))
+
+
 kk=0L
 while kk lt n_elements(grism_list) do begin
 
 ; First thing: for each grism image, open original and tweakreged
-; direct image to measure the shift (I don't trust the measure
-; given in the tweakreg output shift file. it is evidently wrong
-; I.B.)
-;dir_or_name=path+'DATA/DIRECT/DIRECT_orig/'+strmid(direct_list[kk],0,19)+'.fits'
-;;;;    dir_or_name=path+'DATA/DIRECT/DIRECT_orig/'+strmid(direct_list[kk],0,19)+'_crclean.fits'
+; direct image to measure the shift
 dir_or_name=path+'DATA/DIRECT/DIRECT_orig/'+strmid(direct_list[kk],0,19)+'.fits'
 dir_or=mrdfits(dir_or_name,1,HD_DIR_OR)
-;dir_twk_name=path+'DATA/DIRECT/'+strmid(direct_list[kk],0,19)+'.fits'
-;;;;    dir_twk_name=path+'DATA/DIRECT/'+strmid(direct_list[kk],0,19)+'_crclean.fits'
+
 dir_twk_name=path+'DATA/DIRECT/'+strmid(direct_list[kk],0,19)+'.fits'
 dir_twk=mrdfits(dir_twk_name,1,HD_DIR_TWK)
 
@@ -229,9 +340,12 @@ PRINT, 'ORIGINAL PIXELSCALE grism:',ORIG_PIXSCALE
 Ddec[kk]=-DELTA_dec[kk] ;
 DRA[kk]=-DELTA_RA[kk]   ;
 
-print,'LLLLLLLLLLLLLLLLL'
-print, Ddec[kk], DRA[kk] 
-print,'LLLLLLLLLLLLLLLLL'
+print,'LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL'
+print, "Delta ra and dec in units of [deg]"
+print, " along RA and Dec axis"
+print, "Delta RA  ="+string(DRA[kk] )
+print, "Delta dec ="+string(Ddec[kk])
+print,'LLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL'
 ;><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><><>
 
 kk=kk+1
@@ -261,38 +375,25 @@ printf,6,'from drizzlepac import astrodrizzle'
 printf,6,'from drizzlepac import tweakback'
 printf,6,'import glob'
 printf,6,'from stwcs import wcsutil'
-printf,6,'import stwcs.wcsutil.headerlet'       
+printf,6,'import stwcs.wcsutil.headerlet' 
+printf,6,'from drizzlepac import updatehdr'      
 
 
-
-; OLD bad pixel mask fixpix ----------
-;printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v5.pl'+'",linterp=1000,cinterp="INDEF")'
-;printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+pathconf+'/aXe/CONFIG/bp_mask_v5.pl'+'",linterp=1000,cinterp="INDEF")'
 ; NEW bad pixel mask VERSION 6.1        ---------
-printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
-printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
+IF G102_OBS eq 'YES' THEN BEGIN
+ printf,6,'iraf.fixpix(images="@G102_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
+ numG102 = n_elements(g102_list)
+ENDIF
+IF G141_OBS eq 'YES' THEN BEGIN
+ printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+expand_path(pathconf)+'/aXe/CONFIG/bp_mask_v6.pl'+'",linterp=1000,cinterp="INDEF")'
+ numG141 = n_elements(g141_list)
+ENDIF
 ; ------------------------------------
 
 
-
-       numG102 = n_elements(g102_list)
-       numG141 = n_elements(g141_list)
-;generate CR-cleaned fits files using drizzle
 ;*************************************
        printf,6,'                '
 
-; xxxxxxxxxxxx SOBSTITUTED BY I.B.. See below new version xxxxxxxxxxxx
-;       if numG102 gt 1 then begin
-;          printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-;       endif else begin
-;          printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'
-;       endelse
-;       if numG141 gt 1 then begin
-;          printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-;       endif else begin
-;          printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'
-;       endelse
-; xxxxxxxxxxxx SOBSTITUTED BY I.B. See here below new version xxxxxxxxxxxx
 ; xxxxxxxxxxxx SOBSTITUTED BY I.B.. New version starts here xxxxxxxxxxxx
 ; Changes:
 ;   1) updatewcs=True-->False ; This would cancel the tweakreg wcs
@@ -302,108 +403,64 @@ printf,6,'iraf.fixpix(images="@G141_clean.list//[1]%'+"'"+'",masks="'+expand_pat
 ; for this reason they will not be copied in the final DIRECT_GRISM
 ; folder.
 
+IF G102_OBS eq 'YES' THEN BEGIN
 if numG102 gt 1 then begin
  printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)'; Don't use: ,skysub=False)'
 endif else begin
  printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'; Don't use: ,skysub=False)'
 endelse
+ENDIF
+
+IF G141_OBS eq 'YES' THEN BEGIN
 if numG141 gt 1 then begin
  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)'; Don't use: ,skysub=False)'
 endif else begin
  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_orig",num_cores=5,final_wcs=True,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'; Don't use: ,skysub=False)'
 endelse
-;; xxxxxxxxxxxx SOBSTITUTED BY I.B.. See here above new version
+ENDIF
+
 ;; xxxxxxxxxxxx
        
-   printf,6,'time.sleep(5)'
-   printf,6,'                '
+printf,6,'time.sleep(5)'
+printf,6,'                '
 
 ;apply the shift to each exposure's corresponding grism image
 ;*************************************
-
-;    printf,6,'import stwcs'
-;    printf,6,'cobj = teal.teal("apply_headerlet", loadOnly=True)'
-
-   printf,6,'from drizzlepac import updatehdr'
+for i = 0, n_elements(grism_list)-1 do begin
+printf,6,'print "Updating grism HDR through x,y shifts (computed in tweakprepgrism.pro)"'
 
 
-   for i = 0, n_elements(grism_list)-1 do begin
-;     printf,6,'print "Updating grism HDR through hlet "'
-     printf,6,'print "Updating grism HDR through x,y shifts "'
-      
-;      printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "F110W_twk_drz.fits", wcsname="Tweakdirect", scale=1.0, xsh='+strtrim(shiftx[i],2)+', ysh='+strtrim(shifty[i],2) +', fit=None, xrms=None, yrms=None, verbose=True, force=False, sciext="SCI")'
-; CHANGES (I.B.)
-; 1) THIS (above) IS AN ERROR: the reference image is the image with
-;respect to which the shifts and scaling factors were computed. Here above, the
-;reference image and the grism images do not have the same scales (example)
-; CORRECTION:      Here below, we use the grism exposure
-;itself as a reference image, since we want to modify the grism wcs in
-;the same way as the direct images were modified in the tweaksex.pro
-;phase (tweakreg). The direct exposures have the same scale as the
-;grism exposure and every shift computed there has the same value here. 
+ ; 1) Differently from what is reported in the documentation of
+ ;  'updatewcs_with_shift', the xsh and ysh required in input shoud be
+ ;  in units of degrees (delta_RA and delta_dec) and not in units of
+ ;  pixels. This error is corrected here below.
 
-; printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[0]+'", wcsname="Tweakdirect", scale=1.0, xsh='+strtrim(shiftx[i],2)+', ysh='+strtrim(shifty[i],2) +', fit=None, xrms=None, yrms=None, verbose=True, force=False, sciext="SCI")'
+ ; 2) The same shift computed for the science (SCI) frame must be
+ ;  replicated for all the other frames in the grism Multi Extenction
+ ;  File (that is not a simle fits)
 
-; 2) Differently from what is reported in the documentation of
-; 'updatewcs_with_shift', the xsh and ysh required in input shoud be
-; in units of degrees (delta_RA and delta_dec) and not in units of
-; pixels. This error is corrected here below.
+ ;--------------------------------------------------------
+ ; TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG
+ ; TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG
+ ;--------------------------------------------------------
+ ; TWEAKREG OF GRISM EXPOSURES HAPPENS HERE 
+ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="SCI")'
+ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="ERR")'
+ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="DQ")'
+ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="SAMP")'
+ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="TIME")'
+;--------------------------------------------------------
+; TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG
+; TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG TWKG
+;--------------------------------------------------------
 
-; 3) The same shift computed for the science (SCI) frame must be
-; replicated for all the other frames in the grism Multi Extenction
-; File (that is not a simle fits)
-
-printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="SCI")'
-printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="ERR")'
-printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="DQ")'
-printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="SAMP")'
-printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'", wcsname="Tweakdirect", scale=1.0, xsh= '+strcompress(string(DRA[i]),/remove_all)+', ysh= '+strcompress(string(Ddec[i]),/remove_all) +', fit=None, xrms=None, yrms=None, verbose=True, force=True, sciext="TIME")'
-
-;IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-; The following does not work. It says that the headerlet and
-; destination file names are not coincident 
-;     printf,6,'from stsci.tools import teal'
-;     printf,6,'import stwcs'
-;     printf,6,'cobj = teal.teal("apply_headerlet", loadOnly=True)'
-;     printf,6,'cobj["Primary"] = "True"'
-;     printf,6,'cobj["Force"] = "True"'
-;     printf,6,'cobj["filename"] = "'+grism_list[i]+'.fits"'
-;     printf,6,'cobj["hdrlet"] = "'+direct_list[i]+'.fits"'
-;     printf,6,'stwcs.gui.apply_headerlet.run(cobj)'
-;IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII
-
-; /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-; CREATES AN HEADERLET WITH THE SAME NAME AS THE GRISM EXPOSURE
-; Does not work. It says "global name 'wcskey' is not defined"
-; whatever is set in wcskey.
-; printf,6,'hlet=stwcs.wcsutil.headerlet.create_headerlet(filename="../DIRECT/'+strmid(direct_list[i],0,19)+'.fits", sciext="SCI", destim="'+strmid(grism_list[i],0,9)+'",wcskey=" ")'
-; printf,6,'hlet.apply_as_primary(fobj="'+strmid(grism_list[i],0,9)+'_flt_clean.fits", attach="True",force="True")
-; /\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/
-
-
-   endfor
+endfor
 
 
 
-;now final drizzle of the tweakreged images
-;*************************************
+; drizzle of the tweakreged grism exposures after tweakreging
+;*************************************************************
    printf,6,'                  '
-; xxxxxxxxxxxx SOBSTITUTED BY I.B. See below new version xxxxxxxxxxxx
-;      if numG102 gt 1 then begin   
-;         printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_twk",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)'
-;         printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-;      endif else begin
-;         printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_twk",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,median=False,blot=False,driz_cr=False)'
-;         printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'
-;      endelse
-;
-;      if numG141 gt 1 then begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75)'
-;      printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False)'
-;   endif else begin
-;      printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,median=False,blot=False,driz_cr=False)'
-;      printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=True,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'
-;   endelse
 ; xxxxxxxxxxxx SOBSTITUTED BY I.B. See here below new version xxxxxxxxxxxx
 ; xxxxxxxxxxxx SOBSTITUTED BY I.B. New version starts here xxxxxxxxxxxx
 ; Changes:
@@ -415,13 +472,15 @@ printf,6,'updatehdr.updatewcs_with_shift("'+grism_list[i]+'", "'+grism_list[i]+'
 ;   3) They are copied (by new_drizprep.pro) into the DIRECT_GRISM folder but with a
 ;   different name. Examples: 
 ;   - GRISM/G102_twk_twkpg.drz.fits --> DIRECT_GRISM/G102_drz.fits
-;   - GRISM/G102_twkpg_orig_scale_drz.fits --> DIRECT_GRISM/G102_orig_scale_drz.fits
+;   - GRISM/G102_twkpg_orig_scale_drz.fits -->
+;     DIRECT_GRISM/G102_orig_scale_drz.fits
+; ------------------------------------------------------------------
 ; NOTE: the following images should be used only as check images and
 ; for this reason they will not be copied in the final DIRECT_GRISM
 ; folder
+; ------------------------------------------------------------------
 
-
-
+IF G102_OBS eq 'YES' THEN BEGIN
 if numG102 gt 1 then begin
    ; Median IMAGE
    printf,6,'iraf.combine(input="@G102_clean.list//[1]%'+"'"+'",output="G102.fits",combine="median")'
@@ -433,40 +492,53 @@ if numG102 gt 1 then begin
    printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_twk_twkpg",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,median=False,blot=False,driz_cr=False,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'; Don't use: ,skysub=False)'
    printf,6,'astrodrizzle.AstroDrizzle("@G102_clean.list", output="G102_twkpg_orig_scale",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'; Don't use:,skysub=False'
  endelse
+ENDIF
 
+IF G141_OBS eq 'YES' THEN BEGIN
  if numG141 gt 1 then begin
-   ; Median IMAGE
-   printf,6,'iraf.combine(input="@G141_clean.list//[1]%'+"'"+'",output="G141.fits",combine="median")'
-   printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk_twkpg",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'; Don't use: ,skysub=False)'
-   printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twkpg_orig_scale",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)'; Don't use: ,skysub=False)'
+  ; Median IMAGE
+  printf,6,'iraf.combine(input="@G141_clean.list//[1]%'+"'"+'",output="G141.fits",combine="median")'
+  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk_twkpg",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')' ; Don't use: ,skysub=False)'
+  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twkpg_orig_scale",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False)' ; Don't use: ,skysub=False)'
  endif else begin
-   ; Median IMAGE
-   printf,6,'iraf.combine(input="@G141_clean.list//[1]%'+"'"+'",output="G141.fits",combine="median")'
-   printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk_twkpg",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,median=False,blot=False,driz_cr=False,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'; Don't use: ,skysub=False)'
-   printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twkpg_orig_scale",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'; Don't use: ,skysub=False)'
+  ; Median IMAGE
+  printf,6,'iraf.combine(input="@G141_clean.list//[1]%'+"'"+'",output="G141.fits",combine="median")'
+  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twk_twkpg",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,final_scale=0.08,final_pixfrac=0.75,median=False,blot=False,driz_cr=False,final_outnx='+NXpixels_tot+',final_outny='+NYpixels_tot+',final_ra='+RA_ref+',final_dec='+dec_ref+')'; Don't use: ,skysub=False)'
+  printf,6,'astrodrizzle.AstroDrizzle("@G141_clean.list", output="G141_twkpg_orig_scale",final_wcs=True,num_cores=5,final_wht_type="IVM",build=True,updatewcs=False,clean=True,preserve=False,median=False,blot=False,driz_cr=False)'; Don't use: ,skysub=False)'
 endelse
-;;; xxxxxxxxxxxx SOBSTITUTED BY I.B. See here above new version xxxxxxxxxxxx
+ENDIF
 
-   close,6
-
-                                ; to generate the file lists to be
-                                ; used for drizzling
  
- openw,3, path+'DATA/GRISM/G102_crclean.list'
- openw,4, path+'DATA/GRISM/G141_crclean.list'
+ 
+close,6
 
- for ii =0, n_elements(g102_list)-1 do begin
-       printf,3,strmid(g102_list[ii],0,9),'_flt_clean_crclean.fits'
- endfor
- for ii =0, n_elements(g141_list)-1 do begin
-       printf,4,strmid(g141_list[ii],0,9),'_flt_clean_crclean.fits'
- endfor
 
-    spawn,'cp '+path+'DATA/GRISM/G102_crclean.list '+path+'DATA/DIRECT_GRISM/'
-    spawn,'cp '+path+'DATA/GRISM/G141_crclean.list '+path+'DATA/DIRECT_GRISM/'
-    spawn,'cp '+path+'DATA/DIRECT/F110W_twk_drz.fits '+path+'DATA/GRISM/'
 
-close,3,4
+; Generate the file lists
+;****************************
+
+openw,3, path+'DATA/GRISM/G102_crclean.list'
+IF G102_OBS eq 'YES' THEN BEGIN
+for ii =0, n_elements(g102_list)-1 do begin
+ printf,3,strmid(g102_list[ii],0,9),'_flt_clean_crclean.fits'
+endfor
+ENDIF
+close,3
+
+openw,4, path+'DATA/GRISM/G141_crclean.list'
+IF G141_OBS eq 'YES' THEN BEGIN
+for ii =0, n_elements(g141_list)-1 do begin
+ printf,4,strmid(g141_list[ii],0,9),'_flt_clean_crclean.fits'
+endfor
+ENDIF
+close,4
+
+spawn,'cp '+path+'DATA/GRISM/G102_crclean.list '+path+'DATA/DIRECT_GRISM/'
+spawn,'cp '+path+'DATA/GRISM/G141_crclean.list '+path+'DATA/DIRECT_GRISM/'
+IF J_OBS eq 'YES' THEN spawn,'cp '+path+'DATA/DIRECT/F110W_twk_drz.fits '+path+'DATA/GRISM/'
+IF H_OBS eq 'F140' THEN spawn,'cp '+path+'DATA/DIRECT/F140W_twk_drz.fits '+path+'DATA/GRISM/'
+IF H_OBS eq 'F160' THEN spawn,'cp '+path+'DATA/DIRECT/F160W_twk_drz.fits '+path+'DATA/GRISM/'
+
        
     
 end

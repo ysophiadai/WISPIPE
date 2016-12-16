@@ -751,10 +751,12 @@ if TS eq '0' then begin
 endif
 
 
-print, '-----------------------------------------------------------------------------------'
-print, 'NOTE:'
-print, 'The next following floating overflow and underflow messages do not have to be considered as errors. If you read this sentece, the program completed its computations.'
-print, '-----------------------------------------------------------------------------------'
+print, '------------------------------------------------------------------------------------'
+print, 'match_cat.pro: NOTE:'
+print, 'The possible presence of floating overflow and underflow error messages '
+print, 'error messages right below this line, does not have to be considered as an error.'
+print, 'If you read this sentece, the program completed its computations.'
+print, '------------------------------------------------------------------------------------'
 
 
 if TS eq '1' then stop
