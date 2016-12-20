@@ -131,7 +131,7 @@ def aXe_noback_drizzle():
 
     # Running axecore:
     # ============================
-    if os.path.isfile("F110W_drz.fits"):
+    if os.path.isfile("DATA/DIRECT_GRISM/F110W_drz.fits"):
         print """
         --> axecore(inlist=GRISM+"_axeprep.lis", configs=conf_file, back="NO",
         extrfwhm=9.0, backfwhm=3.0, drzfwhm=4.0,
@@ -149,7 +149,7 @@ def aXe_noback_drizzle():
             lambda_psf=1153.0, np=30, interp=1, smooth_length=0, smooth_fwhm=0.0,
             spectr="YES",  adj_sens="YES", weights="YES", sampling="drizzle")
     else:
-        if os.path.isfile("F140W_drz.fits"):
+        if os.path.isfile("DATA/DIRECT_GRISM/F140W_drz.fits"):
             print """
             --> axecore(inlist=GRISM+"_axeprep.lis", configs=conf_file, back="NO",
             extrfwhm=9.0, backfwhm=3.0, drzfwhm=4.0,
