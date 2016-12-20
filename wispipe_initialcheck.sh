@@ -18,5 +18,5 @@ ur_setup common primary
 cd $WISPIPE/IDL
 # Important: don't send EOF to the program, otherwise it stops showing only the grism exposures
 idl<< EOF
-.run findf_IB1.pro
-findf_IB1,'$1','$WISPDATA'
+.run findf.pro
+findf,'$1','$WISPDATA'

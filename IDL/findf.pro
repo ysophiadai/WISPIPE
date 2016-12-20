@@ -3,6 +3,7 @@
 ;# Reduction Pipeline for the WISP program
 ;# Created by Sophia Dai 2014.06.11
 ;# Purpose: Q/A check on all the *flt.fits files
+; # MR modified this to make it show both CCDs of the UVIS chip. 
 ;# Input: 
 ;# Output:
 ;#         Display in ds9 of the *flt.fits files ordered by filters
@@ -11,14 +12,14 @@
 ;# cd  $PATH/WISPS/DATA/data2/WISPS/data/Par339a
 ;# idl   
 ;# > .r findf
-;# > findf
+;# > findf,"Par326"
 ;###############################################################
 
-pro findf,field,clean=clean, ir=ir
-
+pro findf,field, path,clean=clean, ir=ir
 ;path_data = path0+'/data/'+field+"/"
-if keyword_set(field) then cd,'$WISPDATA/data/Par'+strtrim(field,2)
+if keyword_set(field) then cd,expand_path(path)+'/data/'+strtrim(field,2)
 spawn, 'ls -1 *flt*.fits', flt
+print, flt
 if keyword_set(clean) then spawn, 'ls -1 *flt_clean.fits', flt
 
 next = 'n'
@@ -69,12 +70,22 @@ qacheck:
               for mm = 1, n_elements(m)-1 do begin
                  allinone = allinone+' '+all[m[mm]]
               endfor
-              if m[0] ne -1 then spawn,'ds9 -zscale -zoom 0.25 '+allinone+' &'
-             ;=============== end of Q/A check  =======================
-print, 'Click enter to continue: '
-read,next
+              if m[0] ne -1 then begin
+                 spawn,'ds9 -zscale -zoom 0.25 '+allinone+' &'
+                 ;print, 'ds9 -zscale -zoom 0.25 '+allinone+' &'
+                 if filterlist[j] eq 'F475X' or filterlist[j] eq 'F600LP' or filterlist[j] eq 'F606W' or filterlist[j] eq 'F814W' then begin
+                    splitallinone = strsplit(allinone, /extract)
+                    for idx=0, n_elements(splitallinone)-1 do begin
+                       splitallinone[idx]= splitallinone[idx]+'[4] '
+                    endfor
+                    allinone = strjoin(splitallinone)
+                    spawn,'ds9 -zscale -zoom 0.25 '+allinone+'&'
+                    ;print, 'ds9 -zscale -zoom 0.25 '+allinone+'&'
+                 endif
+              endif
+              ;=============== end of Q/A check  =======================
+;print, 'Click enter to continue: '
+;read,next
 next:
 endfor
-
-
 end

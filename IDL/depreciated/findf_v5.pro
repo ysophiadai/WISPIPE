@@ -11,14 +11,14 @@
 ;# cd  $PATH/WISPS/DATA/data2/WISPS/data/Par339a
 ;# idl   
 ;# > .r findf
-;# > findf,"Par326"
+;# > findf
 ;###############################################################
 
-pro findf_IB1,field, path,clean=clean, ir=ir
+pro findf,field,clean=clean, ir=ir
+
 ;path_data = path0+'/data/'+field+"/"
-if keyword_set(field) then cd,expand_path(path)+'/data/'+strtrim(field,2)
+if keyword_set(field) then cd,'$WISPDATA/data/Par'+strtrim(field,2)
 spawn, 'ls -1 *flt*.fits', flt
-print, flt
 if keyword_set(clean) then spawn, 'ls -1 *flt_clean.fits', flt
 
 next = 'n'
@@ -71,9 +71,10 @@ qacheck:
               endfor
               if m[0] ne -1 then spawn,'ds9 -zscale -zoom 0.25 '+allinone+' &'
              ;=============== end of Q/A check  =======================
-;print, 'Click enter to continue: '
-;read,next
+print, 'Click enter to continue: '
+read,next
 next:
 endfor
+
 
 end
