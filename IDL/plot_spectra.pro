@@ -418,7 +418,11 @@ spawn,'ls -1 '+path+'Plots/spectra_*.eps | sort -t "_" -n -k2,2 -k3,3 -k4,4 > '+
 ;create pdf from all eps files
 
 ;PSTOPDF='gs'     ; USE GOSTSCRIPT
-PSTOPDF='joinpy'  ; USE joinpy (default on mac OS)
+;PSTOPDF='joinpy'  ; USE joinpy (default on mac OS)
+
+; check to see whether to use join.py (Mac OSX) or gs (good for Linux)
+result = FILE_TEST('/System/Library/Automator/Combine PDF Pages.action/Contents/Resources/join.py')
+if result eq 1 then PSTOPDF='joinpy' else PSTOPDF='gs'
 
 if PSTOPDF eq 'gs' then begin
    spawn,'gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile='+path+'Plots/'+field+'_spectra.pdf @'+path+'Plots/eps.list'
