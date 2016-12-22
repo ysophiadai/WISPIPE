@@ -164,3 +164,12 @@ G141   icdxbfonq_flt.fits
 G102   icdxd3l2q_flt.fits
 G102   icdxd5liq_flt.fits
 G102   icdxd6lqq_flt.fits
+
+404: F160W and F110W, persistence from grism images in many images. Leaving as is for now
+427: id1k9akoq_flt.fits id1k8zk9q_flt.fits (satellite trail) Also in UVIS id1k8fsiq_flt.fits, but leaving as is for now.
+        G102: id1k9akpq_flt.fits bad
+454: id1k4ks7q_flt.fits and id1k4jquq_flt.fits (satellite trail UVIS,leaving alone)
+        G102: id1k4msrq_flt.fits
+453: F110W & F160W: persistence from grism images in many images. Leaving as is for now
+        G102: Minor issue with id1k3lftq_flt.fits, leaving as is for now. 
+456: G160W: id1k0fokq_flt.fits satellite trail. In corner, so leaving as is. G102: id1k0dnvq_flt.fits higher background, but leaving as is. 
