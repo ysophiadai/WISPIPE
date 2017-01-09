@@ -22,3 +22,10 @@ Par349 - IR: Spectral Line Persistence
 Par352 -
 Par357 -
 Par360 - UVIS: satellite trail, optical ghosts
+Par404 - Bright stars, causing optical ghosts in UVIS, Persistence in IR data. 
+Par427 - **** BAD *** UVIS wierd bright mark in middle - will affect photometry, but only in small region. IR: Spectral Line Persistence --- PDF LOOKS WIERD? Background is not flat. AND BRIGHT
+Par453 - optical ghosts in UVIS from bright stars
+Par454 - UVIS: Leftover satelite trails, Persistence in IR data
+Par456 -
+
+
