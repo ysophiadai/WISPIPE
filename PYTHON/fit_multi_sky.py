@@ -243,8 +243,11 @@ class Grism():
             # spatial extent
             r2 = A*(x-xc)**2 + B*(x-xc)*(y-yc) + C*(y-yc)**2
             mask = np.where(r2 <= (3.5)**2)
-            ymin = np.min(mask[0])
-            ymax = np.max(mask[0])
+            try:
+                ymin = np.min(mask[0])
+                ymax = np.max(mask[0])
+            except ValueError:
+                continue
             # mask
             im[ymin:ymax,xmin:xmax] = 0
 
@@ -472,7 +475,6 @@ def clean_par(skypath, verbose=True):
         imlist = 'DATA/DIRECT/%s_clean.list'%filt
         if os.stat(imlist).st_size != 0:
             d = np.genfromtxt(imlist, dtype='S100')
-            print d.size,d,imlist
             if d.size != 0:
              if d.size==1:
               AA=d
