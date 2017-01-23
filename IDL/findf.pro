@@ -3,7 +3,12 @@
 ;# Reduction Pipeline for the WISP program
 ;# Created by Sophia Dai 2014.06.11
 ;# Purpose: Q/A check on all the *flt.fits files
-; # MR modified this to make it show both CCDs of the UVIS chip. 
+;# MR modified this to make it show both CCDs of the UVIS chip. 
+;# MR modified this to have /uvis flag to chek in UVIS directory
+;# NOTE: /uvis only checks uvis directory! So if you ran
+;# uvis_preprocess first then you want to run this twice, e.g.:
+; # findf, 'Par336', '$WISPDATA'
+; # findf, 'Par336', '$WISPDATA', /UVIS
 ;# Input: 
 ;# Output:
 ;#         Display in ds9 of the *flt.fits files ordered by filters
@@ -15,9 +20,10 @@
 ;# > findf,"Par326"
 ;###############################################################
 
-pro findf,field, path,clean=clean, ir=ir
+pro findf,field, path,clean=clean, ir=ir, uvis=uvis
 ;path_data = path0+'/data/'+field+"/"
 if keyword_set(field) then cd,expand_path(path)+'/data/'+strtrim(field,2)
+if keyword_set(field) and keyword_set(uvis) then cd,expand_path(path)+'/data/'+strtrim(field,2)+'/UVIS/'
 spawn, 'ls -1 *flt*.fits', flt
 print, flt
 if keyword_set(clean) then spawn, 'ls -1 *flt_clean.fits', flt
