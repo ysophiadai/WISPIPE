@@ -100,6 +100,7 @@ F110W   ic3t39hrq_flt.fits (noisy, CR)
 325: F160W   icdx9otuq_flt.fits     
 326: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
 333: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
+336: Both F160W and F110W, persistence from grism images in many images. Leaving as is for now
 339: 
 noisy stripes:
 G102   icdx10k7q_flt.fits
