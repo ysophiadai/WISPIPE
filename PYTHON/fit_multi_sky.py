@@ -474,20 +474,15 @@ def clean_par(skypath, verbose=True):
         filtlist = np.array([], dtype='S100')
         imlist = 'DATA/DIRECT/%s_clean.list'%filt
         if os.stat(imlist).st_size != 0:
-            d = np.genfromtxt(imlist, dtype='S100')
-            if d.size != 0:
-             if d.size==1:
-              AA=d
-             if d.size>1:
-              AA=d[0]
-             if AA != 'none':
+            d = np.atleast_1d(np.genfromtxt(imlist, dtype='S100'))
+            if d[0] != 'none':
                 filtlist = np.append(filtlist, d)
         directlist[filt] = filtlist
 
     for glist,filt in zip([g102list,g141list],['G102','G141']):
         # not every par has both grisms
         if os.stat(glist).st_size != 0:
-            imlist = np.genfromtxt(glist, dtype='S100')
+            imlist = np.atleast_1d(np.genfromtxt(glist, dtype='S100'))
             for image in imlist:
                 # check that grism file in G*_clean.list exists
                 if os.path.exists(os.path.join('DATA/GRISM',image)):
