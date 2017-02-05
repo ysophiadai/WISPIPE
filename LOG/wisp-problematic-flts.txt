@@ -46,6 +46,7 @@ Par198: black strip to the left of the G141 band
 208: bad exposures in all     
 223: bad exposures in all     
 232: G102   ibtt22fhq_flt.fits     
+244: G141   ibtt5dkaq_flt.fits
 236: G102   ibtt08n0q_flt.fits     
 250: F140W: ibtt54jyq.fits, persistence     
 253: bad exposures in all     
